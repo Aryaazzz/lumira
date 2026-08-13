@@ -1,13 +1,25 @@
 <?php
 
-use App\Http\Controllers\Admin\SellerApplicationController as AdminSellerApplicationController;
-use App\Http\Controllers\MarketplaceController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Seller\ProductController;
-use App\Http\Controllers\SellerApplicationController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\SellerApplicationController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\TopUpController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\NotificationController;
+
+use App\Http\Controllers\Admin\SellerApplicationController as AdminSellerApplicationController;
+use App\Http\Controllers\Admin\TopUpController as AdminTopUpController;
+
+use App\Http\Controllers\Seller\ProductController;
+use App\Http\Controllers\Seller\SellerOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,35 +36,27 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/marketplace', [
-    MarketplaceController::class,
-    'index'
-])->name('marketplace');
+Route::get(
+    '/marketplace',
+    [MarketplaceController::class, 'index']
+)->name('marketplace');
 
-Route::get('/marketplace/{product}', [
-    MarketplaceController::class,
-    'show'
-])->name('marketplace.show');
+Route::get(
+    '/marketplace/{product}',
+    [MarketplaceController::class, 'show']
+)->name('marketplace.show');
 
 /*
 |--------------------------------------------------------------------------
-| AUTH
+| AUTHENTICATED
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'verified'])->group(function () {
-
-    /*
-    |--------------------------------------------------------------------------
-    | DASHBOARD REDIRECT
-    |--------------------------------------------------------------------------
-    */
+Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', function () {
 
-        $role = auth()->user()->role;
-
-        return match ($role) {
+        return match (auth()->user()->role) {
             'admin' => redirect()->route('admin.dashboard'),
             'seller' => redirect()->route('seller.dashboard'),
             default => redirect()->route('user.dashboard'),
@@ -85,6 +89,138 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | NOTIFICATIONS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/notifications',
+        [NotificationController::class, 'index']
+    )->name('notifications.index');
+
+    Route::post(
+        '/notifications/{notification}/read',
+        [NotificationController::class, 'read']
+    )->name('notifications.read');
+
+    Route::post(
+        '/notifications/read-all',
+        [NotificationController::class, 'readAll']
+    )->name('notifications.readAll');
+
+    /*
+    |--------------------------------------------------------------------------
+    | TOP UP
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/topup',
+        [TopUpController::class, 'index']
+    )->name('topup.index');
+
+    Route::post(
+        '/topup',
+        [TopUpController::class, 'store']
+    )->name('topup.store');
+
+    Route::get(
+        '/topup/history',
+        [TopUpController::class, 'history']
+    )->name('topup.history');
+
+    /*
+    |--------------------------------------------------------------------------
+    | CART
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/cart',
+        [CartController::class, 'index']
+    )->name('cart.index');
+
+    Route::post(
+        '/cart/add/{product}',
+        [CartController::class, 'add']
+    )->name('cart.add');
+
+    Route::patch(
+        '/cart/update/{cartItem}',
+        [CartController::class, 'update']
+    )->name('cart.update');
+
+    Route::delete(
+        '/cart/remove/{cartItem}',
+        [CartController::class, 'remove']
+    )->name('cart.remove');
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHECKOUT
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/checkout',
+        [CheckoutController::class, 'store']
+    )->name('checkout.store');
+
+    /*
+    |--------------------------------------------------------------------------
+    | ORDERS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/orders',
+        [OrderController::class, 'index']
+    )->name('orders.index');
+
+    /*
+    |--------------------------------------------------------------------------
+    | REVIEWS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/orders/{order}/review',
+        [ReviewController::class, 'create']
+    )->name('reviews.create');
+
+    Route::post(
+        '/orders/{order}/review',
+        [ReviewController::class, 'store']
+    )->name('reviews.store');
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHAT
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/chat',
+        [ChatController::class, 'index']
+    )->name('chat.index');
+
+    Route::post(
+        '/chat/start/{product}',
+        [ChatController::class, 'start']
+    )->name('chat.start');
+
+    Route::get(
+        '/chat/{conversation}',
+        [ChatController::class, 'show']
+    )->name('chat.show');
+
+    Route::post(
+        '/chat/{conversation}/send',
+        [ChatController::class, 'send']
+    )->name('chat.send');
+
+    /*
+    |--------------------------------------------------------------------------
     | SELLER
     |--------------------------------------------------------------------------
     */
@@ -114,6 +250,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
             '/seller/products/{product}',
             [ProductController::class, 'destroy']
         )->name('seller.products.destroy');
+
+        Route::get(
+            '/seller/orders',
+            [SellerOrderController::class, 'index']
+        )->name('seller.orders.index');
+
+        Route::post(
+            '/seller/orders/{orderItem}/ship',
+            [SellerOrderController::class, 'ship']
+        )->name('seller.orders.ship');
+
+        Route::post(
+            '/seller/orders/{orderItem}/complete',
+            [SellerOrderController::class, 'complete']
+        )->name('seller.orders.complete');
     });
 
     /*
@@ -142,6 +293,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
             '/admin/seller-applications/{sellerApplication}/reject',
             [AdminSellerApplicationController::class, 'reject']
         )->name('admin.seller.reject');
+
+        Route::get(
+            '/admin/topups',
+            [AdminTopUpController::class, 'index']
+        )->name('admin.topups.index');
+
+        Route::post(
+            '/admin/topups/{topUp}/approve',
+            [AdminTopUpController::class, 'approve']
+        )->name('admin.topups.approve');
+
+        Route::post(
+            '/admin/topups/{topUp}/reject',
+            [AdminTopUpController::class, 'reject']
+        )->name('admin.topups.reject');
     });
 });
 
@@ -169,4 +335,4 @@ Route::middleware('auth')->group(function () {
     )->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

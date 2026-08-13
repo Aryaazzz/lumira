@@ -1,9 +1,15 @@
 <script setup>
-import { Head } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
 
 defineProps({
     product: Object
 })
+
+const startChat = (productId) => {
+    router.post(
+        route('chat.start', productId)
+    )
+}
 </script>
 
 <template>
@@ -51,6 +57,80 @@ defineProps({
                     <p>
                         {{ product.description }}
                     </p>
+                </div>
+
+                <div class="mt-8">
+
+    <h2 class="font-bold text-xl mb-3">
+        Rating Toko
+    </h2>
+
+    <div class="bg-yellow-50 p-4 rounded">
+
+        <p class="font-bold">
+            ⭐ {{ product.store?.rating ?? 0 }}
+        </p>
+
+        <p>
+            Total Review:
+            {{ product.store?.reviews?.length ?? 0 }}
+        </p>
+
+    </div>
+
+</div>
+
+<div
+    v-if="product.store?.reviews?.length"
+    class="mt-6"
+>
+
+    <h2 class="font-bold text-xl mb-3">
+        Review Pembeli
+    </h2>
+
+    <div
+        v-for="review in product.store.reviews"
+        :key="review.id"
+        class="bg-gray-100 p-4 rounded mb-3"
+    >
+
+        <p class="font-bold">
+            {{ review.user?.name }}
+        </p>
+
+        <p>
+            ⭐ {{ review.rating }}/5
+        </p>
+
+        <p>
+            {{ review.comment }}
+        </p>
+
+    </div>
+
+</div>
+
+                <div class="mt-8 flex gap-3">
+
+                    <button
+                        @click="startChat(product.id)"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg"
+                    >
+                        Chat Penjual
+                    </button>
+
+                    <button
+                        @click="
+                            router.post(
+                                route('cart.add', product.id)
+                            )
+                        "
+                        class="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg"
+                    >
+                        Tambah ke Keranjang
+                    </button>
+
                 </div>
 
             </div>

@@ -36,6 +36,12 @@ import { Head } from '@inertiajs/vue3'
                 </div>
 
             </div>
+            <Link
+    :href="route('seller.orders.index')"
+    class="px-4 py-2 bg-blue-600 text-white rounded"
+>
+    Pesanan Masuk
+</Link>
 
         </div>
 

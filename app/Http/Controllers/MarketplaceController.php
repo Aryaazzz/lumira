@@ -23,15 +23,17 @@ class MarketplaceController extends Controller
     }
 
     public function show(Product $product)
-    {
-        $product->load([
-            'store',
-            'category',
-            'images',
-        ]);
+{
+    $product->load([
+        'category',
+        'store.reviews.user'
+    ]);
 
-        return Inertia::render('Marketplace/Show', [
+    return Inertia::render(
+        'Marketplace/Show',
+        [
             'product' => $product,
-        ]);
-    }
+        ]
+    );
+}
 }

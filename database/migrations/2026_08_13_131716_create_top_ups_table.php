@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('top_ups', function (Blueprint $table) {
 
             $table->id();
 
@@ -19,25 +19,23 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->decimal('total_price', 12, 2);
+            $table->decimal('amount', 12, 2);
+
+            $table->string('proof');
 
             $table->enum('status', [
                 'pending',
-                'paid',
-                'shipped',
-                'completed',
-                'cancelled',
+                'approved',
+                'rejected',
             ])->default('pending');
 
-            $table->enum('payment_method', [
-                'balance',
-                'cod',
-            ])->default('balance');
+            $table->foreignId('approved_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
-            $table->enum('payment_status', [
-                'paid',
-                'unpaid',
-            ])->default('unpaid');
+            $table->timestamp('approved_at')
+                ->nullable();
 
             $table->timestamps();
         });
@@ -48,6 +46,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('top_ups');
     }
 };

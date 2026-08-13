@@ -25,4 +25,19 @@ class Store extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function conversations()
+{
+    return $this->hasManyThrough(
+        Conversation::class,
+        Product::class,
+        'store_id',
+        'product_id'
+    );
+}
+
+public function reviews()
+{
+    return $this->hasMany(Review::class);
+}
 }

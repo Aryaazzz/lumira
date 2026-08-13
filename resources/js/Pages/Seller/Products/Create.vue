@@ -2,7 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, useForm } from '@inertiajs/vue3'
 
-const props = defineProps({
+defineProps({
     categories: Array
 })
 
@@ -12,11 +12,16 @@ const form = useForm({
     description: '',
     price: '',
     stock: '',
-    image: null
+    image: null,
 })
 
 function submit() {
-    form.post('/seller/products')
+    form.post(
+        route('seller.products.store'),
+        {
+            forceFormData: true,
+        }
+    )
 }
 </script>
 
@@ -57,14 +62,13 @@ function submit() {
                     >
                         {{ category.name }}
                     </option>
-
                 </select>
 
                 <textarea
                     v-model="form.description"
-                    class="w-full border rounded p-3"
                     rows="5"
-                />
+                    class="w-full border rounded p-3"
+                ></textarea>
 
                 <input
                     v-model="form.price"
@@ -82,10 +86,19 @@ function submit() {
 
                 <input
                     type="file"
-                    @input="form.image = $event.target.files[0]"
+                    @change="form.image = $event.target.files[0]"
+                    class="w-full border rounded p-3"
                 >
 
+                <div
+                    v-if="form.errors.image"
+                    class="text-red-500"
+                >
+                    {{ form.errors.image }}
+                </div>
+
                 <button
+                    type="submit"
                     class="bg-green-600 text-white px-6 py-3 rounded"
                 >
                     Simpan Produk

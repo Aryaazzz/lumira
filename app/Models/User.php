@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Review;
+use App\Models\Notification;
 
 #[Fillable([
     'name',
@@ -47,6 +49,11 @@ class User extends Authenticatable
         return $this->hasOne(Store::class);
     }
 
+    public function cart()
+{
+    return $this->hasOne(Cart::class);
+}
+
     public function reviewedApplications()
     {
         return $this->hasMany(
@@ -69,4 +76,51 @@ class User extends Authenticatable
     {
         return $this->role === 'user';
     }
+
+    public function orders()
+{
+    return $this->hasMany(Order::class);
+}
+
+   public function buyerConversations()
+{
+    return $this->hasMany(
+        Conversation::class,
+        'buyer_id'
+    );
+}
+
+public function sellerConversations()
+{
+    return $this->hasMany(
+        Conversation::class,
+        'seller_id'
+    );
+}
+
+public function messages()
+{
+    return $this->hasMany(
+        Message::class,
+        'sender_id'
+    );
+}
+
+public function topUps()
+{
+    return $this->hasMany(
+        TopUp::class
+    );
+}
+
+public function reviews()
+{
+    return $this->hasMany(Review::class);
+}
+
+    public function notifications()
+{
+    return $this->hasMany(Notification::class)
+        ->latest();
+}
 }
