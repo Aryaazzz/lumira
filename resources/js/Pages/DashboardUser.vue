@@ -1,12 +1,36 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, Link, usePage } from '@inertiajs/vue3'
+
+const page = usePage()
+
+defineProps({
+    announcement: Object,
+})
 </script>
 
 <template>
     <Head title="Dashboard User" />
 
     <AuthenticatedLayout>
+
+        <div
+    v-if="announcement"
+    class="max-w-7xl mx-auto mt-6"
+>
+    <div
+        class="bg-yellow-100 border border-yellow-300 rounded-lg p-4"
+    >
+        <h3 class="font-bold text-lg">
+            📢 {{ announcement.title }}
+        </h3>
+
+        <p class="mt-2">
+            {{ announcement.content }}
+        </p>
+    </div>
+</div>
+
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-bold">
@@ -39,6 +63,41 @@ import { Head, Link } from '@inertiajs/vue3'
         </template>
 
         <div class="max-w-7xl mx-auto py-8">
+
+            <!-- Flash Error -->
+            <div
+                v-if="page.props.flash?.error"
+                class="bg-red-100 border border-red-300 text-red-700 p-4 rounded mb-6"
+            >
+                {{ page.props.flash.error }}
+            </div>
+
+            <!-- Seller Suspended -->
+            <div
+                v-if="
+                    $page.props.auth.user.seller_status === 'suspended'
+                "
+                class="bg-red-100 border border-red-300 text-red-700 p-6 rounded-lg mb-6"
+            >
+                <h3 class="font-bold text-lg">
+                    Akun Seller Ditangguhkan
+                </h3>
+
+                <p class="mt-2">
+                    Hak seller Anda sedang dicabut oleh admin.
+                    Anda masih dapat menggunakan akun ini sebagai pembeli.
+                </p>
+
+                <div class="mt-4">
+                    <Link
+                        href="/seller/apply"
+                        class="inline-block bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                    >
+                        Ajukan Seller Kembali
+                    </Link>
+                </div>
+            </div>
+
             <div class="bg-white rounded-lg shadow p-6">
 
                 <h1 class="text-3xl font-bold">
@@ -78,6 +137,9 @@ import { Head, Link } from '@inertiajs/vue3'
                     </Link>
 
                     <Link
+                        v-if="
+                            $page.props.auth.user.seller_status !== 'suspended'
+                        "
                         :href="route('seller.apply')"
                         class="bg-green-500 text-white p-6 rounded-lg text-center hover:bg-green-600"
                     >
@@ -90,8 +152,24 @@ import { Head, Link } from '@inertiajs/vue3'
                         </p>
                     </Link>
 
+                    <div
+                        v-else
+                        class="bg-gray-300 text-gray-600 p-6 rounded-lg text-center"
+                    >
+                        <h3 class="font-bold text-lg">
+                            Status Seller Ditangguhkan
+                        </h3>
+
+                        <p class="mt-2">
+                            Hubungi admin atau ajukan kembali.
+                        </p>
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
+
     </AuthenticatedLayout>
 </template>

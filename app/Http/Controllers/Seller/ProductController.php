@@ -33,6 +33,16 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+
+        if (auth()->user()->isSuspended()) {
+
+    return back()->with(
+        'error',
+        'Akun seller Anda sedang ditangguhkan oleh admin.'
+    );
+
+}
+
         $request->validate([
             'name' => ['required'],
             'category_id' => ['required'],

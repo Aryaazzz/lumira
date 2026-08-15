@@ -11,29 +11,38 @@ class MarketplaceController extends Controller
     {
         $products = Product::with([
             'store',
-            'category'
+            'category',
         ])
         ->where('status', 'active')
+        ->where('is_hidden', false)
         ->latest()
         ->get();
 
-        return Inertia::render('Marketplace/Index', [
-            'products' => $products,
-        ]);
+        return Inertia::render(
+            'Marketplace/Index',
+            [
+                'products' => $products,
+            ]
+        );
     }
 
     public function show(Product $product)
-{
-    $product->load([
-        'category',
-        'store.reviews.user'
-    ]);
+    {
+        // Produk yang disembunyikan admin tidak boleh dibuka
+        if ($product->is_hidden) {
+            abort(404);
+        }
 
-    return Inertia::render(
-        'Marketplace/Show',
-        [
-            'product' => $product,
-        ]
-    );
-}
+        $product->load([
+            'category',
+            'store.reviews.user',
+        ]);
+
+        return Inertia::render(
+            'Marketplace/Show',
+            [
+                'product' => $product,
+            ]
+        );
+    }
 }

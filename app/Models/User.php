@@ -8,8 +8,16 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Review;
+
+use App\Models\Cart;
+use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\Notification;
+use App\Models\Order;
+use App\Models\Review;
+use App\Models\SellerApplication;
+use App\Models\Store;
+use App\Models\TopUp;
 
 #[Fillable([
     'name',
@@ -18,8 +26,14 @@ use App\Models\Notification;
     'role',
     'avatar',
     'balance',
+
     'warning_count',
+
     'seller_status',
+
+    'is_suspended',
+
+    'suspension_reason',
 ])]
 #[Hidden([
     'password',
@@ -35,24 +49,25 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+
             'balance' => 'decimal:2',
+
+            'is_suspended' => 'boolean',
         ];
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Seller Application
+    |--------------------------------------------------------------------------
+    */
+
     public function sellerApplication()
     {
-        return $this->hasOne(SellerApplication::class);
+        return $this->hasOne(
+            SellerApplication::class
+        );
     }
-
-    public function store()
-    {
-        return $this->hasOne(Store::class);
-    }
-
-    public function cart()
-{
-    return $this->hasOne(Cart::class);
-}
 
     public function reviewedApplications()
     {
@@ -61,6 +76,120 @@ class User extends Authenticatable
             'reviewed_by'
         );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Store
+    |--------------------------------------------------------------------------
+    */
+
+    public function store()
+    {
+        return $this->hasOne(
+            Store::class
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cart
+    |--------------------------------------------------------------------------
+    */
+
+    public function cart()
+    {
+        return $this->hasOne(
+            Cart::class
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Orders
+    |--------------------------------------------------------------------------
+    */
+
+    public function orders()
+    {
+        return $this->hasMany(
+            Order::class
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Chat
+    |--------------------------------------------------------------------------
+    */
+
+    public function buyerConversations()
+    {
+        return $this->hasMany(
+            Conversation::class,
+            'buyer_id'
+        );
+    }
+
+    public function sellerConversations()
+    {
+        return $this->hasMany(
+            Conversation::class,
+            'seller_id'
+        );
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(
+            Message::class,
+            'sender_id'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Top Up
+    |--------------------------------------------------------------------------
+    */
+
+    public function topUps()
+    {
+        return $this->hasMany(
+            TopUp::class
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reviews
+    |--------------------------------------------------------------------------
+    */
+
+    public function reviews()
+    {
+        return $this->hasMany(
+            Review::class
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Notifications
+    |--------------------------------------------------------------------------
+    */
+
+    public function notifications()
+    {
+        return $this->hasMany(
+            Notification::class
+        )->latest();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Role Helpers
+    |--------------------------------------------------------------------------
+    */
 
     public function isAdmin(): bool
     {
@@ -77,50 +206,14 @@ class User extends Authenticatable
         return $this->role === 'user';
     }
 
-    public function orders()
-{
-    return $this->hasMany(Order::class);
-}
+    /*
+    |--------------------------------------------------------------------------
+    | Seller Management
+    |--------------------------------------------------------------------------
+    */
 
-   public function buyerConversations()
-{
-    return $this->hasMany(
-        Conversation::class,
-        'buyer_id'
-    );
-}
-
-public function sellerConversations()
-{
-    return $this->hasMany(
-        Conversation::class,
-        'seller_id'
-    );
-}
-
-public function messages()
-{
-    return $this->hasMany(
-        Message::class,
-        'sender_id'
-    );
-}
-
-public function topUps()
-{
-    return $this->hasMany(
-        TopUp::class
-    );
-}
-
-public function reviews()
-{
-    return $this->hasMany(Review::class);
-}
-
-    public function notifications()
-{
-    return $this->hasMany(Notification::class)
-        ->latest();
-}
+    public function isSuspended(): bool
+    {
+        return (bool) $this->is_suspended;
+    }
 }

@@ -1,10 +1,29 @@
+
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 
 defineProps({
     orders: Array,
 })
+
+const form = useForm({
+    rating: 5,
+    comment: '',
+})
+
+function submitReview(orderId)
+{
+    form.post(
+        route('reviews.store', orderId),
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                form.reset()
+            }
+        }
+    )
+}
 </script>
 
 <template>
@@ -38,11 +57,9 @@ defineProps({
                     class="bg-white p-6 rounded shadow"
                 >
 
-                    <div
-                        class="flex justify-between"
-                    >
-                        <div>
+                    <div class="flex justify-between">
 
+                        <div>
                             <h3 class="font-bold">
                                 Order #{{ order.id }}
                             </h3>
@@ -61,7 +78,6 @@ defineProps({
                                 Status Bayar:
                                 {{ order.payment_status }}
                             </p>
-
                         </div>
 
                         <div>
@@ -69,6 +85,7 @@ defineProps({
                                 Rp {{ order.total_price }}
                             </p>
                         </div>
+
                     </div>
 
                     <hr class="my-4">
@@ -99,40 +116,65 @@ defineProps({
                             order.status === 'completed'
                             && !order.review
                         "
-                        class="mt-4"
+                        class="mt-6 border-t pt-4"
                     >
 
-                        <Link
-                            :href="
-                                route(
-                                    'reviews.create',
-                                    order.id
-                                )
+                        <h4 class="font-bold mb-3">
+                            Beri Review Toko
+                        </h4>
+
+                        <form
+                            @submit.prevent="
+                                submitReview(order.id)
                             "
-                            class="inline-block bg-yellow-500 text-white px-4 py-2 rounded"
+                            class="space-y-3"
                         >
-                            Beri Review
-                        </Link>
+
+                            <select
+                                v-model="form.rating"
+                                class="border rounded p-2 w-full"
+                            >
+                                <option :value="5">⭐⭐⭐⭐⭐</option>
+                                <option :value="4">⭐⭐⭐⭐</option>
+                                <option :value="3">⭐⭐⭐</option>
+                                <option :value="2">⭐⭐</option>
+                                <option :value="1">⭐</option>
+                            </select>
+
+                            <textarea
+                                v-model="form.comment"
+                                rows="3"
+                                class="border rounded p-2 w-full"
+                                placeholder="Tulis review..."
+                            />
+
+                            <button
+                                class="bg-yellow-500 text-white px-4 py-2 rounded"
+                            >
+                                Kirim Review
+                            </button>
+
+                        </form>
 
                     </div>
 
                     <div
                         v-if="order.review"
-                        class="mt-4 p-3 bg-green-100 rounded"
+                        class="mt-6 border-t pt-4"
                     >
 
-                        <p class="font-bold">
-                            Review Terkirim
-                        </p>
+                        <div class="font-bold">
+                            Review Anda
+                        </div>
 
-                        <p>
+                        <div>
                             Rating:
                             {{ order.review.rating }}/5
-                        </p>
+                        </div>
 
-                        <p>
+                        <div>
                             {{ order.review.comment }}
-                        </p>
+                        </div>
 
                     </div>
 

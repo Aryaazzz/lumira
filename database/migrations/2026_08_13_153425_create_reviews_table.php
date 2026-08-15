@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('reviews', function (Blueprint $table) {
@@ -21,18 +24,23 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->foreignId('order_id')
+                ->nullable()
                 ->constrained()
-                ->cascadeOnDelete();
+                ->nullOnDelete();
 
-            $table->integer('rating');
+            $table->tinyInteger('rating');
 
             $table->text('comment')
                 ->nullable();
 
             $table->timestamps();
+
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('reviews');

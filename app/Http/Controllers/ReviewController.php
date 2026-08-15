@@ -5,28 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Review;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class ReviewController extends Controller
 {
-    public function create(Order $order)
-    {
-        $order->load(
-            'items.product.store'
-        );
-
-        return Inertia::render(
-            'Reviews/Create',
-            [
-                'order' => $order,
-            ]
-        );
-    }
-
     public function store(
         Request $request,
         Order $order
     ) {
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        if ($order->review) {
+            return back()->with(
+                'error',
+                'Pesanan ini sudah diberi review.'
+            );
+        }
+
         $request->validate([
             'rating' => [
                 'required',
@@ -41,35 +37,32 @@ class ReviewController extends Controller
             ],
         ]);
 
-        $store = $order
+        $storeId = $order
             ->items
             ->first()
             ->product
-            ->store;
+            ->store_id;
 
         Review::create([
             'user_id' => auth()->id(),
-            'store_id' => $store->id,
+            'store_id' => $storeId,
             'order_id' => $order->id,
             'rating' => $request->rating,
             'comment' => $request->comment,
         ]);
 
-        $store->update([
-            'rating' => round(
-                $store->reviews()->avg('rating'),
-                2
-            ),
-            'total_reviews' => $store
-                ->reviews()
-                ->count(),
-        ]);
+        $store = \App\Models\Store::find($storeId);
 
-        return redirect()
-            ->route('orders.index')
-            ->with(
-                'success',
-                'Review berhasil dikirim'
-            );
+        $store->rating = round(
+            $store->reviews()->avg('rating'),
+            1
+        );
+
+        $store->save();
+
+        return back()->with(
+            'success',
+            'Review berhasil dikirim.'
+        );
     }
 }

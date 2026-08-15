@@ -33,17 +33,33 @@ class AuthenticatedSessionController extends Controller
 
     $request->session()->regenerate();
 
-    $user = auth()->user();
+    $user = $request->user();
 
-    if ($user->role === 'admin') {
-        return redirect()->route('admin.dashboard');
-    }
+if (
+    $user->seller_status === 'suspended'
+) {
+    return redirect()->route(
+        'user.dashboard'
+    )->with(
+        'error',
+        'Hak seller Anda sedang dicabut oleh admin.'
+    );
+}
 
-    if ($user->role === 'seller') {
-        return redirect()->route('seller.dashboard');
-    }
+return match ($user->role) {
 
-    return redirect()->route('user.dashboard');
+    'admin' => redirect()->route(
+        'admin.dashboard'
+    ),
+
+    'seller' => redirect()->route(
+        'seller.dashboard'
+    ),
+
+    default => redirect()->route(
+        'user.dashboard'
+    ),
+};
 }
 
     /**
