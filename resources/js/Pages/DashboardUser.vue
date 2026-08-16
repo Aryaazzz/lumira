@@ -410,9 +410,20 @@ const statsCards = computed(() => [
 
             </div>
 
-            <div class="font-bold text-yellow-600">
-                ⭐ {{ store.rating ?? 0 }}
-            </div>
+           <div class="flex items-center gap-3">
+
+    <div class="font-bold text-yellow-600">
+        ⭐ {{ store.rating ?? 0 }}
+    </div>
+
+    <Link
+        :href="route('store.show', store.slug)"
+        class="px-3 py-1 bg-emerald-600 text-white rounded-lg text-sm"
+    >
+        Kunjungi
+    </Link>
+
+</div>
 
         </div>
 

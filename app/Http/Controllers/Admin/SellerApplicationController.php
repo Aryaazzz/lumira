@@ -30,10 +30,10 @@ class SellerApplicationController extends Controller
     )
     {
         $sellerApplication->update([
-            'status' => 'approved',
-            'reviewed_by' => auth()->id(),
-            'reviewed_at' => now(),
-        ]);
+    'seller_status' => 'approved',
+    'reviewed_by' => auth()->id(),
+    'reviewed_at' => now(),
+]);
 
         $user = $sellerApplication->user;
 
@@ -62,10 +62,10 @@ class SellerApplicationController extends Controller
     )
     {
         $sellerApplication->update([
-            'status' => 'rejected',
-            'reviewed_by' => auth()->id(),
-            'reviewed_at' => now(),
-        ]);
+    'seller_status' => 'rejected',
+    'reviewed_by' => auth()->id(),
+    'reviewed_at' => now(),
+]);
 
         $sellerApplication->user->update([
             'seller_status' => 'rejected',
