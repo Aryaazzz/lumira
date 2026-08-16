@@ -59,18 +59,18 @@ class SellerApplicationController extends Controller
                 'public'
             );
 
-        SellerApplication::create([
-            'user_id' => auth()->id(),
-            'store_name' => $request->store_name,
-            'description' => $request->description,
-            'phone' => $request->phone,
-            'id_card' => $idCard,
-            'selfie' => $selfie,
-            'status' => 'pending',
-        ]);
+       SellerApplication::create([
+    'user_id' => auth()->id(),
+    'store_name' => $request->store_name,
+    'description' => $request->description,
+    'phone' => $request->phone,
+    'id_card' => $idCard,
+    'selfie' => $selfie,
+    'seller_status' => 'pending',
+]);
 
         auth()->user()->update([
-            'seller_status' => 'pending',
+            'seller_status' => 'pending',   
         ]);
 
         return redirect()

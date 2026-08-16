@@ -7,25 +7,21 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     public function up(): void
-    {
-        Schema::table('seller_applications', function (Blueprint $table) {
+{
+    Schema::table('seller_applications', function (Blueprint $table) {
 
-            $table->text('admin_notes')
-                ->nullable()
-                ->after('status');
+        $table->text('admin_notes')
+            ->nullable();
 
-            $table->timestamp('reviewed_at')
-                ->nullable()
-                ->after('admin_notes');
+        $table->timestamp('reviewed_at')
+            ->nullable();
 
-            $table->foreignId('reviewed_by')
-                ->nullable()
-                ->after('reviewed_at')
-                ->constrained('users')
-                ->nullOnDelete();
-        });
-    }
-
+        $table->foreignId('reviewed_by')
+            ->nullable()
+            ->constrained('users')
+            ->nullOnDelete();
+    });
+}
     public function down(): void
     {
         Schema::table('seller_applications', function (Blueprint $table) {

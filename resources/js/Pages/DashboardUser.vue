@@ -259,7 +259,16 @@ const statsCards = computed(() => [
                                 <p class="text-sm text-gray-500">{{ store.reviews_count ?? 0 }} review</p>
                             </div>
                         </div>
-                        <div class="font-bold text-yellow-600">⭐ {{ store.rating ?? 0 }}</div>
+                        <div class="flex items-center gap-3">
+                            <div class="font-bold text-yellow-600">⭐ {{ store.rating ?? 0 }}</div>
+                            <Link
+                                v-if="store.slug"
+                                :href="route('store.show', store.slug)"
+                                class="rounded-lg bg-emerald-600 px-3 py-1 text-sm font-medium text-white"
+                            >
+                                Kunjungi
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>
