@@ -18,6 +18,7 @@ use App\Models\Review;
 use App\Models\SellerApplication;
 use App\Models\Store;
 use App\Models\TopUp;
+use App\Models\Wishlist;
 
 #[Fillable([
     'name',
@@ -216,4 +217,19 @@ class User extends Authenticatable
     {
         return (bool) $this->is_suspended;
     }
+
+    public function wishlists()
+{
+    return $this->hasMany(
+        Wishlist::class
+    );
+}
+
+public function wishlistProducts()
+{
+    return $this->belongsToMany(
+        Product::class,
+        'wishlists'
+    );
+}
 }

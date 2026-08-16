@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
@@ -32,6 +31,13 @@ const showingNavigationDropdown = ref(false);
                             <NavLink :href="route('dashboard')" :active="route().current('dashboard')" class="!text-slate-700 !font-semibold">
                                 Dashboard
                             </NavLink>
+                            <Link :href="route('wishlist.index')" class="relative inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-pink-50 hover:text-pink-600">
+                                <span class="text-base">❤️</span>
+                                <span>Wishlist</span>
+                                <span v-if="$page.props.wishlistCount > 0" class="inline-flex min-w-5 items-center justify-center rounded-full bg-pink-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                    {{ $page.props.wishlistCount }}
+                                </span>
+                            </Link>
                         </div>
                     </div>
 
@@ -82,6 +88,10 @@ const showingNavigationDropdown = ref(false);
                 <div class="space-y-1 border-t border-green-100 bg-white pb-3 pt-2">
                     <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')" class="text-slate-700">
                         Dashboard
+                    </ResponsiveNavLink>
+                    <ResponsiveNavLink :href="route('wishlist.index')" class="flex items-center gap-2 text-slate-700">
+                        <span>❤️</span>
+                        <span>Wishlist</span>
                     </ResponsiveNavLink>
                 </div>
 

@@ -23,7 +23,6 @@ const removeProduct = (id) => {
 }
 
 const totalStock = props.products.reduce((sum, product) => sum + Number(product.stock || 0), 0)
-const totalSold = props.products.reduce((sum, product) => sum + Number(product.sold_count || 0), 0)
 const totalRevenue = props.products.reduce((sum, product) => sum + Number(product.price || 0) * Number(product.sold_count || 0), 0)
 </script>
 

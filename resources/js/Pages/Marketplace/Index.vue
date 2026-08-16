@@ -1,8 +1,45 @@
+
 <script setup>
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
+import { computed, reactive } from 'vue'
 
 const props = defineProps({
-    products: { type: Array, default: () => [] },
+    products: {
+        type: [Array, Object],
+        default: () => [],
+    },
+    categories: {
+        type: Array,
+        default: () => [],
+    },
+    filters: {
+        type: Object,
+        default: () => ({}),
+    },
+    stats: {
+        type: Object,
+        default: () => ({}),
+    },
+    topWishlistProducts: {
+        type: Array,
+        default: () => [],
+    },
+})
+
+const productList = computed(() => {
+    if (Array.isArray(props.products)) {
+        return props.products
+    }
+
+    return props.products?.data ?? []
+})
+
+const paginationLinks = computed(() => props.products?.links ?? [])
+
+const filter = reactive({
+    search: props.filters?.search ?? '',
+    category: props.filters?.category ?? '',
+    sort: props.filters?.sort ?? '',
 })
 
 const formatCurrency = (value) =>
@@ -16,10 +53,33 @@ const productImage = (image) =>
     image ? `/storage/${image}` : 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=900&q=80'
 
 const highlightTags = ['Material daur ulang', 'Hemat biaya', 'Ekologis', 'Produk unggulan']
+
+const applyFilter = () => {
+    router.get(
+        route('marketplace'),
+        {
+            search: filter.search,
+            category: filter.category,
+            sort: filter.sort,
+        },
+        {
+            preserveState: true,
+            replace: true,
+        }
+    )
+}
+
+const resetFilter = () => {
+    filter.search = ''
+    filter.category = ''
+    filter.sort = ''
+
+    router.get(route('marketplace'))
+}
 </script>
 
 <template>
-    <Head title="Marketplace Lumira" />
+    <Head title="Marketplace" />
 
     <div class="min-h-screen bg-[#f5faf6] text-slate-800">
         <header class="relative overflow-hidden bg-gradient-to-br from-[#edf9ee] via-white to-[#f3faf5] text-slate-800">
@@ -57,17 +117,64 @@ const highlightTags = ['Material daur ulang', 'Hemat biaya', 'Ekologis', 'Produk
         </header>
 
         <main class="mx-auto max-w-7xl px-6 py-10 lg:px-8">
+            <section class="mb-8 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 md:p-5">
+                <div class="grid gap-4 md:grid-cols-4">
+                    <input
+                        v-model="filter.search"
+                        type="text"
+                        placeholder="Cari produk..."
+                        class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none transition focus:border-emerald-400 focus:bg-white"
+                    >
+
+                    <select
+                        v-model="filter.category"
+                        class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none transition focus:border-emerald-400 focus:bg-white"
+                    >
+                        <option value="">Semua Kategori</option>
+                        <option v-for="category in categories" :key="category.id" :value="category.id">
+                            {{ category.name }}
+                        </option>
+                    </select>
+
+                    <select
+                        v-model="filter.sort"
+                        class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none transition focus:border-emerald-400 focus:bg-white"
+                    >
+                        <option value="">Urutkan</option>
+                        <option value="price_low">Harga Termurah</option>
+                        <option value="price_high">Harga Termahal</option>
+                        <option value="best_seller">Terlaris</option>
+                    </select>
+
+                    <div class="flex gap-2">
+                        <button
+                            @click="applyFilter"
+                            class="flex-1 rounded-xl bg-emerald-600 px-4 py-3 font-medium text-white transition hover:bg-emerald-700"
+                        >
+                            Terapkan
+                        </button>
+
+                        <button
+                            @click="resetFilter"
+                            class="rounded-xl bg-slate-200 px-4 py-3 font-medium text-slate-700 transition hover:bg-slate-300"
+                        >
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </section>
+
             <div class="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
                     <p class="text-xs font-black uppercase tracking-[0.22em] text-[#0c7c43]">Produk terbaru</p>
                     <h2 class="mt-2 text-3xl font-black text-[#0b2617]">Pilih item favorit Anda</h2>
                 </div>
                 <div class="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm ring-1 ring-slate-200">
-                    {{ products.length }} item tersedia
+                    {{ productList.length }} item tersedia
                 </div>
             </div>
 
-            <div v-if="products.length === 0" class="rounded-[2rem] border border-dashed border-slate-300 bg-white p-12 text-center shadow-sm">
+            <div v-if="productList.length === 0" class="rounded-[2rem] border border-dashed border-slate-300 bg-white p-12 text-center shadow-sm">
                 <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-2xl text-[#0c7c43]">
                     <i class="fas fa-store"></i>
                 </div>
@@ -77,9 +184,9 @@ const highlightTags = ['Material daur ulang', 'Hemat biaya', 'Ekologis', 'Produk
 
             <div v-else class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
                 <Link
-                    v-for="product in products"
+                    v-for="product in productList"
                     :key="product.id"
-                    :href="`/marketplace/${product.id}`"
+                    :href="route('marketplace.show', product.id)"
                     class="group overflow-hidden rounded-[1.75rem] bg-white shadow-[0_16px_40px_rgba(15,23,42,0.08)] ring-1 ring-slate-200 transition duration-300 hover:-translate-y-2 hover:shadow-[0_28px_60px_rgba(12,124,67,0.18)]"
                 >
                     <div class="relative overflow-hidden">
@@ -112,6 +219,20 @@ const highlightTags = ['Material daur ulang', 'Hemat biaya', 'Ekologis', 'Produk
                         </div>
                     </div>
                 </Link>
+            </div>
+
+            <div v-if="paginationLinks.length" class="mt-8 flex flex-wrap items-center justify-center gap-2">
+                <Link
+                    v-for="link in paginationLinks"
+                    :key="link.label"
+                    :href="link.url || '#'
+                    "
+                    v-html="link.label"
+                    class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-emerald-400 hover:text-emerald-600"
+                    :class="{
+                        'bg-emerald-600 text-white border-emerald-600 hover:text-white': link.active,
+                    }"
+                />
             </div>
         </main>
     </div>

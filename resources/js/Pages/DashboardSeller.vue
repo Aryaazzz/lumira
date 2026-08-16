@@ -3,9 +3,19 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 
-defineProps({
+const props = defineProps({
     announcement: Object,
+    stats: Object,
+    topProduct: Object,
+    store: Object,
+    pendingOrders: Number,
+    completedOrders: Number,
+    currentMonthRevenue: Number,
 })
+
+const formatCurrency = (value) => {
+    return Number(value || 0).toLocaleString('id-ID')
+}
 </script>
 
 <template>
@@ -50,7 +60,7 @@ defineProps({
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+                <div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
                     <Link :href="route('seller.products.index')" class="group rounded-[1.6rem] bg-gradient-to-br from-[#0c7c43] to-[#0b2617] p-6 text-white shadow-lg shadow-green-900/20 transition duration-300 hover:-translate-y-1 hover:shadow-2xl" data-aos="fade-up" data-aos-delay="0">
                         <div class="flex items-center justify-between">
                             <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-xl"><i class="fas fa-box"></i></span>

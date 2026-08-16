@@ -3,7 +3,10 @@ import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 
 const props = defineProps({
-    product: Object,
+    product: {
+        type: Object,
+        default: () => ({}),
+    },
 })
 
 const quantity = ref(1)
@@ -11,7 +14,11 @@ const selectedImage = ref(0)
 const activeTab = ref('description')
 
 const mainImage = computed(() => {
-    const gallery = [props.product?.image, 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80']
+    const gallery = [
+        props.product?.image,
+        'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80',
+    ]
+
     return gallery[selectedImage.value] ? `/storage/${gallery[selectedImage.value]}` : gallery[1]
 })
 
@@ -23,16 +30,6 @@ const formatCurrency = (value) =>
     }).format(Number(value || 0))
 
 const totalPrice = computed(() => Number(props.product?.price || 0) * quantity.value)
-
-const startChat = (productId) => {
-    router.post(route('chat.start', productId))
-}
-
-const addToCart = (productId) => {
-    router.post(route('cart.add', productId), {
-        quantity: quantity.value,
-    })
-}
 
 const galleryImages = computed(() => {
     const list = []
@@ -46,6 +43,16 @@ const galleryImages = computed(() => {
 
     return [...new Set(list)]
 })
+
+const startChat = (productId) => {
+    router.post(route('chat.start', productId))
+}
+
+const addToCart = (productId) => {
+    router.post(route('cart.add', productId), {
+        quantity: quantity.value,
+    })
+}
 </script>
 
 <template>
@@ -190,6 +197,7 @@ const galleryImages = computed(() => {
                         <p class="mt-3 text-3xl font-black text-slate-900">{{ product?.store?.reviews?.length ?? 0 }}</p>
                     </div>
                 </div>
+
                 <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
                     <button
                         type="button"

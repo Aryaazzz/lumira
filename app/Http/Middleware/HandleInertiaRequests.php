@@ -28,12 +28,21 @@ class HandleInertiaRequests extends Middleware
      * @return array<string, mixed>
      */
     public function share(Request $request): array
-    {
-        return [
-            ...parent::share($request),
-            'auth' => [
-                'user' => $request->user(),
-            ],
-        ];
-    }
+{
+    return [
+        ...parent::share($request),
+
+        'auth' => [
+            'user' => $request->user(),
+        ],
+
+        'wishlistCount' => fn () =>
+            auth()->check()
+                ? \App\Models\Wishlist::where(
+                    'user_id',
+                    auth()->id()
+                )->count()
+                : 0,
+    ];
+}
 }

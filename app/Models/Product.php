@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Wishlist;
 
 class Product extends Model
 {
@@ -19,6 +20,21 @@ class Product extends Model
     'status',
     'is_hidden',
 ];
+
+    public function wishlists()
+{
+    return $this->hasMany(
+        Wishlist::class
+    );
+}
+
+public function wishlistedBy()
+{
+    return $this->belongsToMany(
+        User::class,
+        'wishlists'
+    );
+}
 
     public function store()
     {

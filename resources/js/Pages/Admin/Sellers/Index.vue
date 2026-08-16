@@ -1,3 +1,4 @@
+
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, router } from '@inertiajs/vue3'
@@ -81,60 +82,57 @@ const statusClass = (isSuspended) =>
                         <h3 class="mt-2 text-2xl font-black text-slate-900">Daftar Seller</h3>
                     </div>
                     <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#edf9ee] text-[#0c7c43]">
-                        <i class="fas fa-users"></i>
+                        <i class="fas fa-store"></i>
                     </div>
                 </div>
 
-                <div v-if="sellers && sellers.length" class="grid gap-4 xl:grid-cols-2">
-                    <div
-                        v-for="seller in sellers"
-                        :key="seller.id"
-                        class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-green-200 hover:bg-white hover:shadow-md"
-                    >
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0c7c43] to-[#0b2617] text-lg font-black text-white shadow-lg shadow-green-950/15">
-                                    {{ getInitials(seller.name) }}
-                                </div>
-                                <div>
-                                    <h4 class="text-lg font-black text-slate-900">{{ seller.name }}</h4>
-                                    <p class="text-xs text-slate-500">{{ seller.email }}</p>
-                                </div>
-                            </div>
-
-                            <span :class="statusClass(seller.is_suspended)" class="inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em]">
-                                {{ seller.is_suspended ? 'Suspended' : 'Active' }}
-                            </span>
-                        </div>
-
-                        <div class="mt-5 grid gap-3 sm:grid-cols-2">
-                            <div class="rounded-2xl bg-white p-3 ring-1 ring-slate-200">
-                                <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Toko</p>
-                                <p class="mt-2 font-bold text-slate-800">{{ seller.store?.name ?? '-' }}</p>
-                            </div>
-
-                            <div class="rounded-2xl bg-white p-3 ring-1 ring-slate-200">
-                                <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Warning</p>
-                                <p class="mt-2 font-black text-slate-800">{{ seller.warning_count }}</p>
-                            </div>
-                        </div>
-
-                        <div class="mt-5 flex flex-wrap gap-2">
-                            <button @click="warningSeller(seller.id)" class="rounded-xl bg-amber-500 px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-amber-900/15 transition hover:-translate-y-0.5 hover:bg-amber-600">
-                                <i class="fas fa-exclamation-triangle mr-1"></i>Warning
-                            </button>
-                            <button v-if="!seller.is_suspended" @click="suspendSeller(seller.id)" class="rounded-xl bg-red-600 px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:bg-red-700">
-                                <i class="fas fa-ban mr-1"></i>Suspend
-                            </button>
-                            <button v-else @click="unsuspendSeller(seller.id)" class="rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-emerald-900/15 transition hover:-translate-y-0.5 hover:bg-emerald-700">
-                                <i class="fas fa-check mr-1"></i>Unsuspend
-                            </button>
-                        </div>
-                    </div>
+                <div v-if="!sellers?.length" class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-slate-500">
+                    Belum ada seller.
                 </div>
 
-                <div v-else class="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50 p-8 text-center text-slate-500">
-                    Belum ada seller terdaftar.
+                <div v-else class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-left text-sm text-slate-700">
+                        <thead class="bg-slate-50 text-xs font-black uppercase tracking-[0.2em] text-slate-500">
+                            <tr>
+                                <th class="px-4 py-3">Seller</th>
+                                <th class="px-4 py-3">Toko</th>
+                                <th class="px-4 py-3">Warning</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr v-for="seller in sellers" :key="seller.id" class="hover:bg-slate-50">
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[#edf9ee] text-sm font-black text-[#0c7c43]">
+                                            {{ getInitials(seller.name) }}
+                                        </div>
+                                        <div>
+                                            <div class="font-black text-slate-900">{{ seller.name }}</div>
+                                            <div class="text-xs text-slate-500">{{ seller.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4">{{ seller.store?.name ?? '-' }}</td>
+                                <td class="px-4 py-4">
+                                    <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">{{ seller.warning_count || 0 }}</span>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <span :class="statusClass(seller.is_suspended)" class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold">
+                                        {{ seller.is_suspended ? 'Suspended' : 'Active' }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="flex flex-wrap gap-2">
+                                        <button @click="warningSeller(seller.id)" class="rounded-xl bg-amber-500 px-3 py-2 text-xs font-bold text-white transition hover:bg-amber-600">Warning</button>
+                                        <button v-if="!seller.is_suspended" @click="suspendSeller(seller.id)" class="rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-700">Suspend</button>
+                                        <button v-else @click="unsuspendSeller(seller.id)" class="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-700">Unsuspend</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
         </div>

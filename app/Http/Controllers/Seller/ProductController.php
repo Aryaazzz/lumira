@@ -74,6 +74,78 @@ class ProductController extends Controller
             ->with('success', 'Produk berhasil ditambahkan');
     }
 
+   public function edit(Product $product)
+{
+    return Inertia::render(
+        'Seller/Products/Edit',
+        [
+            'product' => $product,
+            'categories' => Category::all(),
+        ]
+    );
+}
+
+public function update(
+    Request $request,
+    Product $product
+) {
+
+    $request->validate([
+        'name' => ['required'],
+        'category_id' => ['required'],
+        'description' => ['required'],
+        'price' => ['required', 'numeric'],
+        'stock' => ['required', 'integer'],
+        'status' => ['required'],
+        'image' => ['nullable', 'image'],
+    ]);
+
+    if ($request->hasFile('image')) {
+
+        if ($product->image) {
+
+            Storage::disk('public')->delete(
+                $product->image
+            );
+        }
+
+        $image = $request->file('image')
+            ->store(
+                'products',
+                'public'
+            );
+
+        $product->image = $image;
+    }
+
+    $status = $request->status;
+
+if ($request->stock <= 0) {
+    $status = 'sold_out';
+}
+
+    $product->update([
+    'name' => $request->name,
+    'category_id' => $request->category_id,
+    'description' => $request->description,
+    'price' => $request->price,
+    'stock' => $request->stock,
+    'status' => $status,
+]);
+
+    if (isset($image)) {
+        $product->image = $image;
+        $product->save();
+    }
+
+    return redirect()
+        ->route('seller.products.index')
+        ->with(
+            'success',
+            'Produk berhasil diperbarui'
+        );
+}
+
     public function destroy(Product $product)
     {
         if ($product->image) {
