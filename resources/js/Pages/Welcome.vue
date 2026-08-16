@@ -123,9 +123,8 @@ onUnmounted(() => {
             class="sticky top-0 z-50 transition-all duration-500"
             :class="scrolled ? 'bg-white/95 shadow-sm backdrop-blur-xl' : 'bg-white/70 backdrop-blur-md'"
         >
-            <div class="mx-auto flex max-w-7xl items-center gap-6 px-6 py-4 lg:px-8">
+            <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3 lg:px-8">
 
-                <!-- LOGO -->
                 <Link href="/" class="group flex shrink-0 items-center gap-3">
                     <div class="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#0c7c43] to-[#0b2617] shadow-lg shadow-green-900/25 transition duration-500 group-hover:-rotate-6 group-hover:scale-110">
                         <div class="absolute -right-2 -top-2 h-7 w-7 rounded-full bg-[#22c55e]/30"></div>
@@ -140,41 +139,44 @@ onUnmounted(() => {
                     </div>
                 </Link>
 
-                <!-- NAV LINKS -->
-                <nav class="hidden flex-1 items-center justify-start gap-1 lg:flex">
-                    <a href="#tentang" class="nav-link relative rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-600 transition hover:text-[#0c7c43]">
-                        Tentang
-                    </a>
-                    <a href="#cara-kerja" class="nav-link relative rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-600 transition hover:text-[#0c7c43]">
-                        Cara Kerja
-                    </a>
-                    <a href="#produk" class="nav-link relative rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-600 transition hover:text-[#0c7c43]">
-                        Produk
-                    </a>
-                </nav>
+                <div class="hidden flex-1 lg:block"></div>
 
-                <!-- AUTH -->
                 <div class="flex shrink-0 items-center gap-2">
                     <template v-if="canLogin">
-                        <Link
-                            v-if="isLoggedIn"
-                            :href="route('dashboard')"
-                            class="btn-shine rounded-xl bg-[#0c7c43] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-900/20 transition hover:-translate-y-0.5 hover:bg-[#0b2617]"
-                        >
-                            Dashboard
-                        </Link>
-                        <template v-else>
-                            <Link
-                                :href="route('login')"
-                                class="hidden rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-100 hover:text-[#0c7c43] sm:block"
-                            >
-                                Masuk
+                        <template v-if="isLoggedIn">
+                            <Link :href="route('topup.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-500 shadow-sm transition hover:border-green-200 hover:text-[#0c7c43]" title="Top Up">
+                                <i class="fas fa-wallet"></i>
+                            </Link>
+                            <Link :href="route('cart.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-500 shadow-sm transition hover:border-green-200 hover:text-[#0c7c43]" title="Keranjang">
+                                <i class="fas fa-shopping-cart"></i>
+                            </Link>
+                            <Link :href="route('orders.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-500 shadow-sm transition hover:border-green-200 hover:text-[#0c7c43]" title="Pesanan Saya">
+                                <i class="fas fa-box"></i>
+                            </Link>
+                            <Link :href="route('notifications.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-500 shadow-sm transition hover:border-green-200 hover:text-[#0c7c43]" title="Notifikasi">
+                                <i class="fas fa-bell"></i>
+                            </Link>
+                            <Link :href="route('profile.edit')" class="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1.5 pr-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-green-200 hover:text-[#0c7c43]" title="Profil pengguna">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#edf9ee] text-base text-[#0c7c43]">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                                <span class="max-w-[90px] truncate">{{ page.props.auth.user.name }}</span>
                             </Link>
                             <Link
-                                v-if="canRegister"
-                                :href="route('register')"
-                                class="btn-shine rounded-xl bg-[#0c7c43] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-900/20 transition hover:-translate-y-0.5 hover:bg-[#0b2617]"
+                                :href="route('logout')"
+                                method="post"
+                                as="button"
+                                class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-500 shadow-sm transition hover:border-red-200 hover:text-red-500"
+                                title="Keluar"
                             >
+                                <i class="fas fa-power-off"></i>
+                            </Link>
+                        </template>
+                        <template v-else>
+                            <Link :href="route('login')" class="hidden rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-100 hover:text-[#0c7c43] sm:block">
+                                Masuk
+                            </Link>
+                            <Link v-if="canRegister" :href="route('register')" class="btn-shine rounded-xl bg-[#0c7c43] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-900/20 transition hover:-translate-y-0.5 hover:bg-[#0b2617]">
                                 Daftar
                             </Link>
                         </template>
@@ -245,14 +247,15 @@ onUnmounted(() => {
                                 Jelajahi Produk
                             </a>
                         </template>
-                        <Link
-                            v-else
-                            :href="route('dashboard')"
-                            class="btn-shine group inline-flex items-center gap-3 rounded-2xl bg-[#0c7c43] px-7 py-4 font-black text-white shadow-xl shadow-green-900/20 transition hover:-translate-y-1"
-                        >
-                            Buka Dashboard
-                            <span class="transition group-hover:translate-x-1">→</span>
-                        </Link>
+                        <template v-else>
+                            <Link :href="route('marketplace')" class="btn-shine group inline-flex items-center gap-3 rounded-2xl bg-[#0c7c43] px-7 py-4 font-black text-white shadow-xl shadow-green-900/20 transition hover:-translate-y-1">
+                                Marketplace
+                                <span class="transition group-hover:translate-x-1">→</span>
+                            </Link>
+                            <Link v-if="page.props.auth.user.seller_status !== 'suspended'" :href="route('seller.apply')" class="group inline-flex items-center gap-3 rounded-2xl border border-green-200 bg-[#edf9ee] px-7 py-4 font-bold text-[#0c7c43] shadow-sm transition hover:-translate-y-1">
+                                Daftar Seller
+                            </Link>
+                        </template>
                     </div>
 
                     <!-- TRUST STRIP -->

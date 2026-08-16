@@ -32,6 +32,16 @@ class SellerOrderController extends Controller
 
     public function ship(OrderItem $orderItem)
     {
+
+        if (auth()->user()->isSuspended()) {
+
+    return back()->with(
+        'error',
+        'Akun seller sedang ditangguhkan.'
+    );
+
+}   
+
         $orderItem->order->update([
             'status' => 'shipped',
         ]);
@@ -54,6 +64,16 @@ class SellerOrderController extends Controller
 
     public function complete(OrderItem $orderItem)
     {
+
+        if (auth()->user()->isSuspended()) {
+
+    return back()->with(
+        'error',
+        'Akun seller sedang ditangguhkan.'
+    );
+
+}
+
         $orderItem->order->update([
             'status' => 'completed',
         ]);

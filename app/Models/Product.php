@@ -7,17 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $fillable = [
-        'store_id',
-        'category_id',
-        'name',
-        'slug',
-        'description',
-        'price',
-        'stock',
-        'sold_count',
-        'image',
-        'status',
-    ];
+    'store_id',
+    'category_id',
+    'name',
+    'slug',
+    'description',
+    'price',
+    'stock',
+    'sold_count',
+    'image',
+    'status',
+    'is_hidden',
+];
 
     public function store()
     {

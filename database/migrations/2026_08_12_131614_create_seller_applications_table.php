@@ -26,11 +26,12 @@ return new class extends Migration
 
     $table->string('selfie');
 
-    $table->enum('status',[
-        'pending',
-        'approved',
-        'rejected'
-    ])->default('pending');
+   $table->enum('seller_status', [
+    'pending',
+    'approved',
+    'rejected',
+    'suspended'
+])->default('pending');
 
     $table->timestamps();
 });

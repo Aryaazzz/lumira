@@ -2,80 +2,137 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 
-defineProps({
-    products: Array
+const props = defineProps({
+    products: { type: Array, default: () => [] },
 })
 
+const formatCurrency = (value) =>
+    new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0,
+    }).format(Number(value || 0))
+
+const productImage = (image) =>
+    image ? `/storage/${image}` : 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80'
+
 const removeProduct = (id) => {
-    if (confirm('Hapus produk?')) {
+    if (confirm('Hapus produk ini?')) {
         router.delete(`/seller/products/${id}`)
     }
 }
+
+const totalStock = props.products.reduce((sum, product) => sum + Number(product.stock || 0), 0)
+const totalSold = props.products.reduce((sum, product) => sum + Number(product.sold_count || 0), 0)
+const totalRevenue = props.products.reduce((sum, product) => sum + Number(product.price || 0) * Number(product.sold_count || 0), 0)
 </script>
 
 <template>
     <Head title="Produk Saya" />
 
     <AuthenticatedLayout>
-
-        <div class="p-8">
-
-            <div class="flex justify-between mb-6">
-
-                <h1 class="text-2xl font-bold">
-                    Produk Saya
-                </h1>
+        <template #header>
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-[#0c7c43]">Catalog</p>
+                    <h2 class="mt-2 text-2xl font-black text-[#0b2617] md:text-3xl">Produk Saya</h2>
+                </div>
 
                 <Link
                     href="/seller/products/create"
-                    class="bg-green-600 text-white px-4 py-2 rounded"
+                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#0c7c43] to-[#0b2617] px-5 py-3 text-sm font-black text-white shadow-lg shadow-green-900/20 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                 >
+                    <i class="fas fa-plus"></i>
                     Tambah Produk
                 </Link>
+            </div>
+        </template>
 
+        <div class="space-y-6">
+            <div class="grid gap-4 md:grid-cols-3">
+                <div class="rounded-[1.75rem] bg-gradient-to-br from-[#edf9ee] to-white p-5 ring-1 ring-green-100 shadow-sm">
+                    <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Total produk</p>
+                    <p class="mt-4 text-3xl font-black text-[#0b2617]">{{ products.length }}</p>
+                </div>
+                <div class="rounded-[1.75rem] bg-gradient-to-br from-[#eff6ff] to-white p-5 ring-1 ring-blue-100 shadow-sm">
+                    <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Stok aktif</p>
+                    <p class="mt-4 text-3xl font-black text-[#0b2617]">{{ totalStock }}</p>
+                </div>
+                <div class="rounded-[1.75rem] bg-gradient-to-br from-[#fff7ed] to-white p-5 ring-1 ring-orange-100 shadow-sm">
+                    <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Pendapatan estimasi</p>
+                    <p class="mt-4 text-2xl font-black text-[#0b2617]">{{ formatCurrency(totalRevenue) }}</p>
+                </div>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-6">
+            <div v-if="products.length === 0" class="rounded-[2rem] border border-dashed border-slate-300 bg-white/70 p-12 text-center shadow-sm">
+                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-2xl text-[#0c7c43]">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <h3 class="mt-5 text-2xl font-black text-slate-900">Belum ada produk</h3>
+                <p class="mt-2 text-slate-500">Mulai tambahkan produk pertama Anda untuk memperluas toko.</p>
+                <Link
+                    href="/seller/products/create"
+                    class="mt-6 inline-flex items-center rounded-2xl bg-[#0c7c43] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-green-900/20 transition hover:bg-[#0a6d3a]"
+                >
+                    Tambah produk sekarang
+                </Link>
+            </div>
 
+            <div v-else class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 <div
                     v-for="product in products"
                     :key="product.id"
-                    class="bg-white rounded-xl shadow p-4"
+                    class="group overflow-hidden rounded-[1.75rem] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)] ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-[0_25px_60px_rgba(12,124,67,0.15)]"
                 >
+                    <div class="relative overflow-hidden">
+                        <img
+                            :src="productImage(product.image)"
+                            :alt="product.name"
+                            class="h-60 w-full object-cover transition duration-500 group-hover:scale-105"
+                        >
+                        <div class="absolute left-4 top-4 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#0c7c43] shadow-sm">
+                            {{ product.stock > 0 ? 'Ready' : 'Habis' }}
+                        </div>
+                    </div>
 
-                    <img
-                        :src="`/storage/${product.image}`"
-                        class="w-full h-48 object-cover rounded"
-                    >
+                    <div class="space-y-4 p-5">
+                        <div>
+                            <h3 class="line-clamp-2 text-xl font-black text-slate-900">{{ product.name }}</h3>
+                            <p class="mt-2 text-2xl font-black text-[#0c7c43]">{{ formatCurrency(product.price) }}</p>
+                        </div>
 
-                    <h3 class="font-bold mt-3">
-                        {{ product.name }}
-                    </h3>
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs text-slate-500">
+                            <div class="rounded-2xl bg-slate-50 px-2 py-3">
+                                <div class="font-bold text-slate-700">Stok</div>
+                                <div class="mt-1 text-sm font-black text-slate-900">{{ product.stock }}</div>
+                            </div>
+                            <div class="rounded-2xl bg-slate-50 px-2 py-3">
+                                <div class="font-bold text-slate-700">Terjual</div>
+                                <div class="mt-1 text-sm font-black text-slate-900">{{ product.sold_count }}</div>
+                            </div>
+                            <div class="rounded-2xl bg-slate-50 px-2 py-3">
+                                <div class="font-bold text-slate-700">Views</div>
+                                <div class="mt-1 text-sm font-black text-slate-900">{{ product.views || 0 }}</div>
+                            </div>
+                        </div>
 
-                    <p>
-                        Rp {{ product.price }}
-                    </p>
-
-                    <p>
-                        Stock : {{ product.stock }}
-                    </p>
-
-                    <p>
-                        Terjual : {{ product.sold_count }}
-                    </p>
-
-                    <button
-                        @click="removeProduct(product.id)"
-                        class="mt-3 bg-red-600 text-white px-3 py-2 rounded"
-                    >
-                        Hapus
-                    </button>
-
+                        <div class="flex items-center gap-2 pt-2">
+                            <button
+                                @click="removeProduct(product.id)"
+                                class="flex-1 rounded-2xl bg-red-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-600"
+                            >
+                                <i class="fas fa-trash-alt mr-2"></i>Hapus
+                            </button>
+                            <Link
+                                :href="`/marketplace/${product.id}`"
+                                class="flex-1 rounded-2xl border border-[#0c7c43] bg-[#edf9ee] px-4 py-2.5 text-center text-sm font-bold text-[#0c7c43] transition hover:bg-[#e2f5e8]"
+                            >
+                                Lihat
+                            </Link>
+                        </div>
+                    </div>
                 </div>
-
             </div>
-
         </div>
-
     </AuthenticatedLayout>
 </template>

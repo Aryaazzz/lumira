@@ -15,18 +15,20 @@ class CheckoutController extends Controller
         $request->validate([
             'payment_method' => [
                 'required',
-                'in:balance,cod'
+                'in:balance,cod',
             ],
         ]);
 
         $user = auth()->user();
 
         $cart = Cart::with(
-            'items.product'
-        )->where(
+            'items.product.store'
+        )
+        ->where(
             'user_id',
             $user->id
-        )->first();
+        )
+        ->first();
 
         if (
             !$cart ||
@@ -41,9 +43,11 @@ class CheckoutController extends Controller
         $total = 0;
 
         foreach ($cart->items as $item) {
+
             $total +=
                 $item->product->price *
                 $item->quantity;
+
         }
 
         if (
@@ -63,25 +67,29 @@ class CheckoutController extends Controller
             $request
         ) {
 
-            if ($request->payment_method === 'balance') {
+            if (
+                $request->payment_method === 'balance'
+            ) {
 
-    $user->decrement(
-        'balance',
-        $total
-    );
+                $user->decrement(
+                    'balance',
+                    $total
+                );
 
-    $paymentStatus = 'paid';
-    $orderStatus = 'paid';
-}
-else {
+                $paymentStatus = 'paid';
+                $orderStatus = 'paid';
 
-    $paymentStatus = 'unpaid';
-    $orderStatus = 'pending';
-}
+            } else {
+
+                $paymentStatus = 'unpaid';
+                $orderStatus = 'pending';
+
+            }
+
             $order = Order::create([
                 'user_id' => $user->id,
                 'total_price' => $total,
-                'status' => 'pending',
+                'status' => $orderStatus,
                 'payment_method' => $request->payment_method,
                 'payment_status' => $paymentStatus,
             ]);
@@ -95,14 +103,14 @@ else {
                 ]);
 
                 Notification::create([
-    'user_id' => $item->product->store->user_id,
-    'title' => 'Pesanan Baru',
-    'message' =>
-        auth()->user()->name .
-        ' membeli produk ' .
-        $item->product->name,
-    'type' => 'order',
-]);
+                    'user_id' => $item->product->store->user_id,
+                    'title' => 'Pesanan Baru',
+                    'message' =>
+                        $user->name .
+                        ' membeli produk ' .
+                        $item->product->name,
+                    'type' => 'order',
+                ]);
 
                 $item->product->decrement(
                     'stock',
@@ -113,6 +121,13 @@ else {
                     'sold_count',
                     $item->quantity
                 );
+
+                $item->product
+                    ->store
+                    ->increment(
+                        'total_sales',
+                        $item->quantity
+                    );
             }
 
             $cart->items()->delete();

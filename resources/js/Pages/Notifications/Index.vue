@@ -31,83 +31,99 @@ function readAll()
 
     <AuthenticatedLayout>
 
-        <div class="max-w-5xl mx-auto p-8">
-
-            <div
-                class="flex justify-between items-center mb-6"
-            >
-                <h1
-                    class="text-2xl font-bold"
-                >
-                    Notifikasi
-                </h1>
-
+        <template #header>
+            <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-[#0c7c43]">Pusat Pemberitahuan</p>
+                    <h2 class="mt-2 text-2xl font-black text-[#0b2617] md:text-3xl">
+                        Notifikasi
+                    </h2>
+                </div>
                 <button
+                    v-if="notifications.some(n => !n.is_read)"
                     @click="readAll"
-                    class="bg-green-600 text-white px-4 py-2 rounded"
+                    class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-[#0c7c43] shadow-sm ring-1 ring-green-100 transition hover:bg-[#edf9ee]"
                 >
+                    <i class="fas fa-check-double"></i>
                     Tandai Semua Dibaca
                 </button>
             </div>
+        </template>
 
-            <div
-                v-if="notifications.length === 0"
-                class="bg-white p-6 rounded shadow"
-            >
-                Belum ada notifikasi.
-            </div>
+        <div class="min-h-screen overflow-x-hidden bg-[#f6f8f6]">
+            <div class="mx-auto max-w-7xl px-6 py-8 lg:px-8">
 
-            <div
-                v-else
-                class="space-y-4"
-            >
-
+                <!-- Empty State -->
                 <div
-                    v-for="notification in notifications"
-                    :key="notification.id"
-                    class="bg-white p-5 rounded shadow"
+                    v-if="notifications.length === 0"
+                    class="rounded-[2rem] border-2 border-dashed border-green-200 bg-gradient-to-br from-[#edf9ee] to-[#f6f8f6] p-12 text-center"
+                    data-aos="fade-up"
                 >
-
-                    <div
-                        class="flex justify-between"
-                    >
-
-                        <div>
-
-                            <h3
-                                class="font-bold"
-                            >
-                                {{ notification.title }}
-                            </h3>
-
-                            <p>
-                                {{ notification.message }}
-                            </p>
-
-                            <small>
-                                {{ notification.created_at }}
-                            </small>
-
-                        </div>
-
-                        <button
-                            v-if="!notification.is_read"
-                            @click="
-                                read(
-                                    notification.id
-                                )
-                            "
-                            class="bg-blue-600 text-white px-3 py-2 rounded"
-                        >
-                            Tandai Dibaca
-                        </button>
-
+                    <div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-green-100">
+                        <i class="fas fa-bell text-4xl text-slate-400"></i>
                     </div>
+                    <h3 class="text-2xl font-black text-slate-900">Belum ada notifikasi</h3>
+                    <p class="mt-3 text-slate-500">Kami akan memberitahu Anda tentang pesanan dan promosi menarik.</p>
+                </div>
 
+                <!-- Notifications List -->
+                <div v-else class="space-y-3">
+                    <div
+                        v-for="(notification, idx) in notifications"
+                        :key="notification.id"
+                        data-aos="fade-up"
+                        :data-aos-delay="idx * 30"
+                        class="group rounded-[1.5rem] bg-white shadow-sm ring-1 ring-slate-100 transition duration-300 hover:shadow-lg hover:shadow-green-900/10 overflow-hidden"
+                        :class="!notification.is_read ? 'border-l-4 border-[#0c7c43] bg-gradient-to-r from-[#edf9ee] via-white to-white' : ''"
+                    >
+                        <div class="p-5">
+                            <div class="flex gap-4">
+                                <!-- Icon -->
+                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full" :class="!notification.is_read ? 'bg-[#0c7c43]/10' : 'bg-slate-100'">
+                                    <i class="fas fa-bell" :class="!notification.is_read ? 'text-[#0c7c43]' : 'text-slate-400'"></i>
+                                </div>
+
+                                <!-- Content -->
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex-1 min-w-0">
+                                            <h3 class="font-black text-slate-900" :class="!notification.is_read ? 'text-base' : 'text-sm'">
+                                                {{ notification.title }}
+                                            </h3>
+                                            <p class="mt-1 text-sm leading-6 text-slate-600">
+                                                {{ notification.message }}
+                                            </p>
+
+                                            <div class="mt-3 flex flex-wrap items-center gap-3">
+                                                <span class="text-xs font-bold text-slate-400">
+                                                    <i class="fas fa-clock mr-1"></i>
+                                                    {{ new Date(notification.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}
+                                                </span>
+
+                                                <button
+                                                    v-if="!notification.is_read"
+                                                    @click="read(notification.id)"
+                                                    class="text-xs font-bold text-[#0c7c43] transition hover:text-[#0b2617]"
+                                                >
+                                                    <i class="fas fa-check-circle mr-1"></i>
+                                                    Tandai Dibaca
+                                                </button>
+                                                <span v-else class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold text-green-700">
+                                                    <i class="fas fa-check-circle"></i>Sudah Dibaca
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Unread Indicator -->
+                                        <div v-if="!notification.is_read" class="flex h-3 w-3 shrink-0 rounded-full bg-[#0c7c43] shadow-lg shadow-green-600/40"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
-
         </div>
 
     </AuthenticatedLayout>

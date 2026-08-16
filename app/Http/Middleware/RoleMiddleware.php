@@ -18,7 +18,37 @@ class RoleMiddleware
             abort(403);
         }
 
-        if ($request->user()->role !== $role) {
+        $user = $request->user();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Seller Suspended
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $role === 'seller' &&
+            (
+                $user->seller_status === 'suspended' ||
+                ($user->is_suspended ?? false)
+            )
+        ) {
+
+            return redirect()
+                ->route('user.dashboard')
+                ->with(
+                    'error',
+                    'Hak seller Anda telah dicabut oleh admin.'
+                );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Role Check
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->role !== $role) {
             abort(403);
         }
 

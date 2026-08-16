@@ -17,6 +17,11 @@ use App\Http\Controllers\NotificationController;
 
 use App\Http\Controllers\Admin\SellerApplicationController as AdminSellerApplicationController;
 use App\Http\Controllers\Admin\TopUpController as AdminTopUpController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\SellerManagementController;
+use App\Http\Controllers\Admin\AnnouncementController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
 
 use App\Http\Controllers\Seller\ProductController;
 use App\Http\Controllers\Seller\SellerOrderController;
@@ -59,7 +64,7 @@ Route::middleware(['auth'])->group(function () {
         return match (auth()->user()->role) {
             'admin' => redirect()->route('admin.dashboard'),
             'seller' => redirect()->route('seller.dashboard'),
-            default => redirect()->route('user.dashboard'),
+            default => redirect('/'),
         };
 
     })->name('dashboard');
@@ -73,7 +78,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:user')->group(function () {
 
         Route::get('/user/dashboard', function () {
-            return Inertia::render('DashboardUser');
+            return redirect('/');
         })->name('user.dashboard');
 
         Route::get(
@@ -220,53 +225,67 @@ Route::middleware(['auth'])->group(function () {
     )->name('chat.send');
 
     /*
-    |--------------------------------------------------------------------------
-    | SELLER
-    |--------------------------------------------------------------------------
-    */
+|--------------------------------------------------------------------------
+| SELLER
+|--------------------------------------------------------------------------
+*/
 
-    Route::middleware('role:seller')->group(function () {
+Route::middleware('role:seller')->group(function () {
 
-        Route::get('/seller/dashboard', function () {
-            return Inertia::render('DashboardSeller');
-        })->name('seller.dashboard');
+    Route::get('/seller/dashboard', function () {
 
-        Route::get(
-            '/seller/products',
-            [ProductController::class, 'index']
-        )->name('seller.products.index');
+        $announcement = \App\Models\Announcement::where(
+            'is_active',
+            true
+        )
+        ->latest()
+        ->first();
 
-        Route::get(
-            '/seller/products/create',
-            [ProductController::class, 'create']
-        )->name('seller.products.create');
+        return Inertia::render(
+            'DashboardSeller',
+            [
+                'announcement' => $announcement,
+            ]
+        );
 
-        Route::post(
-            '/seller/products',
-            [ProductController::class, 'store']
-        )->name('seller.products.store');
+    })->name('seller.dashboard');
 
-        Route::delete(
-            '/seller/products/{product}',
-            [ProductController::class, 'destroy']
-        )->name('seller.products.destroy');
+    Route::get(
+        '/seller/products',
+        [ProductController::class, 'index']
+    )->name('seller.products.index');
 
-        Route::get(
-            '/seller/orders',
-            [SellerOrderController::class, 'index']
-        )->name('seller.orders.index');
+    Route::get(
+        '/seller/products/create',
+        [ProductController::class, 'create']
+    )->name('seller.products.create');
 
-        Route::post(
-            '/seller/orders/{orderItem}/ship',
-            [SellerOrderController::class, 'ship']
-        )->name('seller.orders.ship');
+    Route::post(
+        '/seller/products',
+        [ProductController::class, 'store']
+    )->name('seller.products.store');
 
-        Route::post(
-            '/seller/orders/{orderItem}/complete',
-            [SellerOrderController::class, 'complete']
-        )->name('seller.orders.complete');
-    });
+    Route::delete(
+        '/seller/products/{product}',
+        [ProductController::class, 'destroy']
+    )->name('seller.products.destroy');
 
+    Route::get(
+        '/seller/orders',
+        [SellerOrderController::class, 'index']
+    )->name('seller.orders.index');
+
+    Route::post(
+        '/seller/orders/{orderItem}/ship',
+        [SellerOrderController::class, 'ship']
+    )->name('seller.orders.ship');
+
+    Route::post(
+        '/seller/orders/{orderItem}/complete',
+        [SellerOrderController::class, 'complete']
+    )->name('seller.orders.complete');
+
+});
     /*
     |--------------------------------------------------------------------------
     | ADMIN
@@ -275,9 +294,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware('role:admin')->group(function () {
 
-        Route::get('/admin/dashboard', function () {
-            return Inertia::render('DashboardAdmin');
-        })->name('admin.dashboard');
+        Route::get(
+    '/admin/dashboard',
+    [DashboardController::class, 'index']
+)->name('admin.dashboard');
 
         Route::get(
             '/admin/seller-applications',
@@ -308,7 +328,81 @@ Route::middleware(['auth'])->group(function () {
             '/admin/topups/{topUp}/reject',
             [AdminTopUpController::class, 'reject']
         )->name('admin.topups.reject');
+
+        Route::get(
+    '/admin/sellers',
+    [SellerManagementController::class, 'index']
+)->name('admin.sellers.index');
+
+Route::post(
+    '/admin/sellers/{user}/warning',
+    [SellerManagementController::class, 'warning']
+)->name('admin.sellers.warning');
+
+Route::post(
+    '/admin/sellers/{user}/suspend',
+    [SellerManagementController::class, 'suspend']
+)->name('admin.sellers.suspend');
+
+Route::post(
+    '/admin/sellers/{user}/unsuspend',
+    [SellerManagementController::class, 'unsuspend']
+)->name('admin.sellers.unsuspend');
+
+Route::get(
+    '/admin/announcements',
+    [AnnouncementController::class, 'index']
+)->name('admin.announcements.index');
+
+Route::post(
+    '/admin/announcements',
+    [AnnouncementController::class, 'store']
+)->name('admin.announcements.store');
+
+Route::get(
+    '/admin/categories',
+    [CategoryController::class, 'index']
+)->name('admin.categories.index');
+
+Route::post(
+    '/admin/categories',
+    [CategoryController::class, 'store']
+)->name('admin.categories.store');
+
+Route::patch(
+    '/admin/categories/{category}',
+    [CategoryController::class, 'update']
+)->name('admin.categories.update');
+
+Route::delete(
+    '/admin/categories/{category}',
+    [CategoryController::class, 'destroy']
+)->name('admin.categories.destroy');
+
+    Route::get(
+    '/admin/products',
+    [AdminProductController::class, 'index']
+)->name('admin.products.index');
+
+Route::delete(
+    '/admin/products/{product}',
+    [AdminProductController::class, 'destroy']
+)->name('admin.products.destroy');
+
+Route::post(
+    '/admin/products/{product}/hide'
+    ,
+    [AdminProductController::class, 'hide']
+)->name('admin.products.hide');
+
+Route::post(
+    '/admin/products/{product}/show'
+    ,
+    [AdminProductController::class, 'show']
+)->name('admin.products.show');
+
     });
+
 });
 
 /*
