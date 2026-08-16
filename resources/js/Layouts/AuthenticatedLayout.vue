@@ -40,7 +40,23 @@ const showingNavigationDropdown = ref(false);
                                     Dashboard
                                 </NavLink>
                             </div>
+
+                            <Link
+                                :href="route('wishlist.index')"
+                                class="relative inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-pink-50 hover:text-pink-600"
+                            >
+                                <span class="text-base">❤️</span>
+                                <span>Wishlist</span>
+
+                                <span
+                                    v-if="$page.props.wishlistCount > 0"
+                                    class="inline-flex min-w-5 items-center justify-center rounded-full bg-pink-600 px-1.5 py-0.5 text-[10px] font-bold text-white"
+                                >
+                                    {{ $page.props.wishlistCount }}
+                                </span>
+                            </Link>
                         </div>
+                        
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
                             <!-- Settings Dropdown -->

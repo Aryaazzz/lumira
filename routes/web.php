@@ -14,6 +14,8 @@ use App\Http\Controllers\TopUpController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\StoreController as PublicStoreController;
+use App\Http\Controllers\WishlistController;
 
 use App\Http\Controllers\Admin\SellerApplicationController as AdminSellerApplicationController;
 use App\Http\Controllers\Admin\TopUpController as AdminTopUpController;
@@ -25,7 +27,7 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 
 use App\Http\Controllers\Seller\ProductController;
 use App\Http\Controllers\Seller\SellerOrderController;
-
+use App\Http\Controllers\Seller\StoreController as SellerStoreController;
 /*
 |--------------------------------------------------------------------------
 | PUBLIC
@@ -51,6 +53,11 @@ Route::get(
     [MarketplaceController::class, 'show']
 )->name('marketplace.show');
 
+Route::get(
+    '/store/{store:slug}',
+    [PublicStoreController::class, 'show']
+)->name('store.show');
+
 /*
 |--------------------------------------------------------------------------
 | AUTHENTICATED
@@ -59,15 +66,52 @@ Route::get(
 
 Route::middleware(['auth'])->group(function () {
 
+Route::get(
+    '/seller/apply',
+    [SellerApplicationController::class, 'create']
+)->name('seller.apply');
+
+Route::post(
+    '/seller/apply',
+    [SellerApplicationController::class, 'store']
+)->name('seller.apply.store');
+
     Route::get('/dashboard', function () {
+        $user = auth()->user();
 
-        return match (auth()->user()->role) {
-            'admin' => redirect()->route('admin.dashboard'),
-            'seller' => redirect()->route('seller.dashboard'),
-            default => redirect()->route('user.dashboard'),
-        };
+        if (! $user) {
+            return redirect()->route('login');
+        }
 
+        if ($user->seller_status === 'suspended') {
+            return redirect()->route('user.dashboard')->with(
+                'error',
+                'Hak seller Anda sedang dicabut oleh admin.'
+            );
+        }
+
+        return redirect()->route(match ($user->role) {
+            'admin' => 'admin.dashboard',
+            'seller' => 'seller.dashboard',
+            'user' => 'user.dashboard',
+            default => 'user.dashboard',
+        });
     })->name('dashboard');
+
+    Route::get(
+        '/wishlist',
+        [WishlistController::class, 'index']
+    )->name('wishlist.index');
+
+Route::post(
+    '/wishlist/{product}',
+    [WishlistController::class, 'store']
+)->name('wishlist.store');
+
+Route::delete(
+    '/wishlist/{product}',
+    [WishlistController::class, 'destroy']
+)->name('wishlist.destroy');
 
     /*
     |--------------------------------------------------------------------------
@@ -75,36 +119,92 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware('role:user')->group(function () {
+   Route::get('/user/dashboard', function () {
 
-        Route::get('/user/dashboard', function () {
+    $user = auth()->user();
 
     $announcement = \App\Models\Announcement::where(
         'is_active',
         true
-    )
-    ->latest()
-    ->first();
+    )->latest()->first();
+
+    $recentOrders = \App\Models\Order::with([
+    'orderItems.product',
+])
+->where(
+    'user_id',
+    $user->id
+)
+->latest()
+->take(5)
+->get();
+
+$bestSellingProducts = \App\Models\Product::with([
+    'store',
+    'category',
+])
+->where('status', 'active')
+->orderByDesc('sold_count')
+->take(4)
+->get();
+
+$topStores = \App\Models\Store::with([
+    'user',
+])
+->withCount('reviews')
+->orderByDesc('rating')
+->take(5)
+->get();
 
     return Inertia::render(
         'DashboardUser',
         [
             'announcement' => $announcement,
+            'recentOrders' => $recentOrders,
+            'bestSellingProducts' => $bestSellingProducts,
+            'topStores' => $topStores,
+
+            'stats' => [
+
+                'balance' => $user->balance,
+
+                'orders' =>
+                    \App\Models\Order::where(
+                        'user_id',
+                        $user->id
+                    )->count(),
+
+                'shippedOrders' =>
+                    \App\Models\Order::where(
+                        'user_id',
+                        $user->id
+                    )
+                    ->where(
+                        'status',
+                        'shipped'
+                    )
+                    ->count(),
+
+                'wishlistCount' =>
+                    \App\Models\Wishlist::where(
+                        'user_id',
+                        $user->id
+                    )->count(),
+            ],
+
+            'latestProducts' => \App\Models\Product::with([
+    'category',
+    'store',
+
+])
+->where('status', 'active')
+->latest()
+->take(4)
+->get(),
         ]
     );
 
 })->name('user.dashboard');
-
-        Route::get(
-            '/seller/apply',
-            [SellerApplicationController::class, 'create']
-        )->name('seller.apply');
-
-        Route::post(
-            '/seller/apply',
-            [SellerApplicationController::class, 'store']
-        )->name('seller.apply.store');
-    });
 
     /*
     |--------------------------------------------------------------------------
@@ -246,23 +346,115 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware('role:seller')->group(function () {
 
-    Route::get('/seller/dashboard', function () {
+Route::get('/seller/dashboard', function () {
 
-        $announcement = \App\Models\Announcement::where(
+    $store = auth()->user()->store;
+
+    $stats = [
+
+        'products' => $store
+            ->products()
+            ->count(),
+
+        'activeProducts' => $store
+            ->products()
+            ->where('status', 'active')
+            ->count(),
+
+        'soldOutProducts' => $store
+            ->products()
+            ->where('status', 'sold_out')
+            ->count(),
+
+        'soldItems' => $store
+            ->products()
+            ->sum('sold_count'),
+
+        'revenue' => $store
+            ->products()
+            ->sum(
+                \DB::raw(
+                    'price * sold_count'
+                )
+            ),
+
+        
+
+    ];
+
+    $announcement =
+        \App\Models\Announcement::where(
             'is_active',
             true
         )
         ->latest()
         ->first();
 
-        return Inertia::render(
-            'DashboardSeller',
-            [
-                'announcement' => $announcement,
-            ]
-        );
+    $topProduct = $store
+        ->products()
+        ->orderByDesc('sold_count')
+        ->first();
 
-    })->name('seller.dashboard');
+    $currentMonthRevenue = $store
+    ->products()
+    ->sum(
+        \DB::raw(
+            'price * sold_count'
+        )
+    );
+
+$pendingOrders =
+    \App\Models\OrderItem::whereHas(
+        'product',
+        fn ($q) =>
+            $q->where(
+                'store_id',
+                $store->id
+            )
+    )
+    ->whereHas(
+        'order',
+        fn ($q) =>
+            $q->where(
+                'status',
+                'pending'
+            )
+    )
+    ->count();
+
+$completedOrders =
+    \App\Models\OrderItem::whereHas(
+        'product',
+        fn ($q) =>
+            $q->where(
+                'store_id',
+                $store->id
+            )
+    )
+    ->whereHas(
+        'order',
+        fn ($q) =>
+            $q->where(
+                'status',
+                'completed'
+            )
+    )
+    ->count();
+
+    return Inertia::render(
+        'DashboardSeller',
+        [
+            'announcement' => $announcement,
+            'stats' => $stats,
+            'topProduct' => $topProduct,
+            'pendingOrders' => $pendingOrders,
+'completedOrders' => $completedOrders,
+'currentMonthRevenue' => $currentMonthRevenue,
+'store' => $store,
+        ]
+    );
+
+})->name('seller.dashboard');
 
     Route::get(
         '/seller/products',
@@ -273,6 +465,16 @@ Route::middleware('role:seller')->group(function () {
         '/seller/products/create',
         [ProductController::class, 'create']
     )->name('seller.products.create');
+
+    Route::get(
+    '/seller/products/{product}/edit',
+    [ProductController::class, 'edit']
+)->name('seller.products.edit');
+
+Route::put(
+    '/seller/products/{product}',
+    [ProductController::class, 'update'
+])->name('seller.products.update');
 
     Route::post(
         '/seller/products',
@@ -298,6 +500,16 @@ Route::middleware('role:seller')->group(function () {
         '/seller/orders/{orderItem}/complete',
         [SellerOrderController::class, 'complete']
     )->name('seller.orders.complete');
+
+    Route::get(
+    '/seller/store',
+    [SellerStoreController::class, 'edit']
+)->name('seller.store.edit');
+
+Route::post(
+    '/seller/store',
+    [SellerStoreController::class, 'update']
+)->name('seller.store.update');
 
 });
     /*

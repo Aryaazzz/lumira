@@ -1,3 +1,4 @@
+
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, router } from '@inertiajs/vue3'
@@ -57,161 +58,257 @@ function unsuspendSeller(id) {
 
     <AuthenticatedLayout>
 
-        <div
-            class="max-w-7xl mx-auto py-8"
-        >
-
-            <h1
-                class="text-3xl font-bold mb-6"
-            >
+        <template #header>
+            <h2 class="text-xl font-bold">
                 Kelola Seller
-            </h1>
+            </h2>
+        </template>
+
+        <div class="max-w-7xl mx-auto py-8">
+
+            <!-- Statistik -->
+
+            <div
+                class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
+            >
+
+                <div
+                    class="bg-white rounded-xl shadow p-5"
+                >
+                    <p class="text-gray-500">
+                        Total Seller
+                    </p>
+
+                    <h3
+                        class="text-3xl font-bold mt-2"
+                    >
+                        {{ sellers.length }}
+                    </h3>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl shadow p-5"
+                >
+                    <p class="text-gray-500">
+                        Seller Aktif
+                    </p>
+
+                    <h3
+                        class="text-3xl font-bold text-green-600 mt-2"
+                    >
+                        {{
+                            sellers.filter(
+                                s => !s.is_suspended
+                            ).length
+                        }}
+                    </h3>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl shadow p-5"
+                >
+                    <p class="text-gray-500">
+                        Seller Suspended
+                    </p>
+
+                    <h3
+                        class="text-3xl font-bold text-red-600 mt-2"
+                    >
+                        {{
+                            sellers.filter(
+                                s => s.is_suspended
+                            ).length
+                        }}
+                    </h3>
+                </div>
+
+            </div>
+
+            <!-- Table -->
 
             <div
                 class="bg-white rounded-xl shadow overflow-hidden"
             >
 
-                <table
-                    class="w-full"
+                <div
+                    class="p-5 border-b"
+                >
+                    <h3
+                        class="font-bold text-lg"
+                    >
+                        Daftar Seller
+                    </h3>
+                </div>
+
+                <div
+                    v-if="sellers.length === 0"
+                    class="p-8 text-center text-gray-500"
+                >
+                    Belum ada seller.
+                </div>
+
+                <div
+                    v-else
+                    class="overflow-x-auto"
                 >
 
-                    <thead
-                        class="bg-gray-100"
+                    <table
+                        class="w-full"
                     >
-                        <tr>
 
-                            <th
-                                class="p-4 text-left"
-                            >
-                                Seller
-                            </th>
-
-                            <th
-                                class="p-4 text-left"
-                            >
-                                Toko
-                            </th>
-
-                            <th
-                                class="p-4 text-left"
-                            >
-                                Warning
-                            </th>
-
-                            <th
-                                class="p-4 text-left"
-                            >
-                                Status
-                            </th>
-
-                            <th
-                                class="p-4 text-left"
-                            >
-                                Aksi
-                            </th>
-
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        <tr
-                            v-for="seller in sellers"
-                            :key="seller.id"
-                            class="border-t"
+                        <thead
+                            class="bg-gray-100"
                         >
+                            <tr>
 
-                            <td class="p-4">
-                                {{ seller.name }}
-                                <br>
-                                <span
-                                    class="text-sm text-gray-500"
+                                <th
+                                    class="p-4 text-left"
                                 >
-                                    {{ seller.email }}
-                                </span>
-                            </td>
+                                    Seller
+                                </th>
 
-                            <td class="p-4">
-                                {{
-                                    seller.store?.name ??
-                                    '-'
-                                }}
-                            </td>
-
-                            <td class="p-4">
-                                {{ seller.warning_count }}
-                            </td>
-
-                            <td class="p-4">
-
-                                <span
-                                    v-if="seller.is_suspended"
-                                    class="text-red-600 font-bold"
+                                <th
+                                    class="p-4 text-left"
                                 >
-                                    Suspended
-                                </span>
+                                    Toko
+                                </th>
 
-                                <span
-                                    v-else
-                                    class="text-green-600 font-bold"
+                                <th
+                                    class="p-4 text-left"
                                 >
-                                    Active
-                                </span>
+                                    Warning
+                                </th>
 
-                            </td>
-
-                            <td class="p-4">
-
-                                <div
-                                    class="flex gap-2 flex-wrap"
+                                <th
+                                    class="p-4 text-left"
                                 >
+                                    Status
+                                </th>
 
-                                    <button
-                                        @click="
-                                            warningSeller(
-                                                seller.id
-                                            )
-                                        "
-                                        class="bg-yellow-500 text-white px-3 py-2 rounded"
+                                <th
+                                    class="p-4 text-left"
+                                >
+                                    Aksi
+                                </th>
+
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr
+                                v-for="seller in sellers"
+                                :key="seller.id"
+                                class="border-t hover:bg-gray-50"
+                            >
+
+                                <td class="p-4">
+
+                                    <div
+                                        class="font-semibold"
                                     >
-                                        Warning
-                                    </button>
+                                        {{ seller.name }}
+                                    </div>
 
-                                    <button
-                                        v-if="
-                                            !seller.is_suspended
-                                        "
-                                        @click="
-                                            suspendSeller(
-                                                seller.id
-                                            )
-                                        "
-                                        class="bg-red-600 text-white px-3 py-2 rounded"
+                                    <div
+                                        class="text-sm text-gray-500"
                                     >
-                                        Suspend
-                                    </button>
+                                        {{ seller.email }}
+                                    </div>
 
-                                    <button
+                                </td>
+
+                                <td class="p-4">
+                                    {{
+                                        seller.store?.name
+                                        ?? '-'
+                                    }}
+                                </td>
+
+                                <td class="p-4">
+
+                                    <span
+                                        class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm"
+                                    >
+                                        {{
+                                            seller.warning_count
+                                        }}
+                                    </span>
+
+                                </td>
+
+                                <td class="p-4">
+
+                                    <span
+                                        v-if="seller.is_suspended"
+                                        class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold"
+                                    >
+                                        Suspended
+                                    </span>
+
+                                    <span
                                         v-else
-                                        @click="
-                                            unsuspendSeller(
-                                                seller.id
-                                            )
-                                        "
-                                        class="bg-green-600 text-white px-3 py-2 rounded"
+                                        class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold"
                                     >
-                                        Unsuspend
-                                    </button>
+                                        Active
+                                    </span>
 
-                                </div>
+                                </td>
 
-                            </td>
+                                <td class="p-4">
 
-                        </tr>
+                                    <div
+                                        class="flex flex-wrap gap-2"
+                                    >
 
-                    </tbody>
+                                        <button
+                                            @click="
+                                                warningSeller(
+                                                    seller.id
+                                                )
+                                            "
+                                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded"
+                                        >
+                                            Warning
+                                        </button>
 
-                </table>
+                                        <button
+                                            v-if="
+                                                !seller.is_suspended
+                                            "
+                                            @click="
+                                                suspendSeller(
+                                                    seller.id
+                                                )
+                                            "
+                                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded"
+                                        >
+                                            Suspend
+                                        </button>
+
+                                        <button
+                                            v-else
+                                            @click="
+                                                unsuspendSeller(
+                                                    seller.id
+                                                )
+                                            "
+                                            class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded"
+                                        >
+                                            Unsuspend
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
 
             </div>
 

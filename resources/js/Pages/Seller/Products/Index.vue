@@ -64,12 +64,21 @@ const removeProduct = (id) => {
                         Terjual : {{ product.sold_count }}
                     </p>
 
-                    <button
-                        @click="removeProduct(product.id)"
-                        class="mt-3 bg-red-600 text-white px-3 py-2 rounded"
-                    >
-                        Hapus
-                    </button>
+                    <div class="mt-3 flex gap-2">
+                        <Link
+                            :href="route('seller.products.edit', product.id)"
+                            class="bg-blue-600 text-white px-3 py-2 rounded"
+                        >
+                            Edit
+                        </Link>
+
+                        <button
+                            @click="removeProduct(product.id)"
+                            class="bg-red-600 text-white px-3 py-2 rounded"
+                        >
+                            Hapus
+                        </button>
+                    </div>
 
                 </div>
 

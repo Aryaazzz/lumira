@@ -28,39 +28,35 @@ class AuthenticatedSessionController extends Controller
      * Handle an incoming authentication request.
      */
     public function store(LoginRequest $request): RedirectResponse
-{
-    $request->authenticate();
+    {
+        $request->authenticate();
+        $request->session()->regenerate();
 
-    $request->session()->regenerate();
+        $user = $request->user();
 
-    $user = $request->user();
+        if (! $user) {
+            return redirect()->route('login');
+        }
 
-if (
-    $user->seller_status === 'suspended'
-) {
-    return redirect()->route(
-        'user.dashboard'
-    )->with(
-        'error',
-        'Hak seller Anda sedang dicabut oleh admin.'
-    );
-}
+        if ($user->seller_status === 'suspended') {
+            return redirect()->route('user.dashboard')->with(
+                'error',
+                'Hak seller Anda sedang dicabut oleh admin.'
+            );
+        }
 
-return match ($user->role) {
+        return redirect()->route($this->getDashboardRouteName($user->role));
+    }
 
-    'admin' => redirect()->route(
-        'admin.dashboard'
-    ),
-
-    'seller' => redirect()->route(
-        'seller.dashboard'
-    ),
-
-    default => redirect()->route(
-        'user.dashboard'
-    ),
-};
-}
+    protected function getDashboardRouteName(?string $role): string
+    {
+        return match ($role) {
+            'admin' => 'admin.dashboard',
+            'seller' => 'seller.dashboard',
+            'user' => 'user.dashboard',
+            default => 'user.dashboard',
+        };
+    }
 
     /**
      * Destroy an authenticated session.

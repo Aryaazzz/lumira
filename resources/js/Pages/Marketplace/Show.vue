@@ -1,13 +1,34 @@
 <script setup>
-import { Head, router } from '@inertiajs/vue3'
+import { Head, router, Link } from '@inertiajs/vue3'
 
-defineProps({
-    product: Object
+const props = defineProps({
+    product: Object,
+    isWishlisted: Boolean,
 })
 
 const startChat = (productId) => {
     router.post(
         route('chat.start', productId)
+    )
+}
+
+const toggleWishlist = () => {
+    if (props.isWishlisted) {
+        router.delete(
+            route('wishlist.destroy', props.product.id),
+            {
+                preserveScroll: true,
+            }
+        )
+        return
+    }
+
+    router.post(
+        route('wishlist.store', props.product.id),
+        {},
+        {
+            preserveScroll: true,
+        }
     )
 }
 </script>
@@ -48,6 +69,9 @@ const startChat = (productId) => {
                     Terjual:
                     {{ product.sold_count }}
                 </div>
+                <p class="mt-2 text-pink-600">
+    ❤️ Disimpan {{ product.wishlists_count }} pengguna
+</p>
 
                 <div class="mt-8">
                     <h2 class="font-bold text-xl mb-3">
@@ -130,6 +154,36 @@ const startChat = (productId) => {
                     >
                         Tambah ke Keranjang
                     </button>
+
+                    <button
+                        v-if="!isWishlisted"
+                        @click="toggleWishlist"
+                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 px-5 py-3 font-semibold text-white shadow-sm transition hover:brightness-110"
+                    >
+                        <span class="text-lg">❤️</span>
+                        <span>Wishlist</span>
+                    </button>
+
+                    <button
+                        v-else
+                        @click="toggleWishlist"
+                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-5 py-3 font-semibold text-white shadow-sm transition hover:brightness-110"
+                    >
+                        <span class="text-lg">💔</span>
+                        <span>Hapus Wishlist</span>
+                    </button>
+
+                    <Link
+    :href="
+        route(
+            'store.show',
+            product.store.slug
+        )
+    "
+    class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg"
+>
+    Kunjungi Toko
+</Link>
 
                 </div>
 
