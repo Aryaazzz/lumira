@@ -45,7 +45,8 @@ class AuthenticatedSessionController extends Controller
             );
         }
 
-        return redirect()->route($this->getDashboardRouteName($user->role));
+        // Redirect ke home/welcome page untuk semua user
+        return redirect('/');
     }
 
     protected function getDashboardRouteName(?string $role): string

@@ -1,6 +1,7 @@
 <script setup>
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
+import AppFooter from '@/Components/AppFooter.vue'
 
 const props = defineProps({
     product: {
@@ -361,5 +362,7 @@ const toggleWishlist = (productId) => {
                 </div>
             </section>
         </div>
+
+        <AppFooter />
     </div>
 </template>

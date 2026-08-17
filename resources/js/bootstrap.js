@@ -10,25 +10,35 @@ window.axios.defaults.headers.common[
 
 window.Pusher = Pusher
 
-window.Echo = new Echo({
-    broadcaster: 'reverb',
+// Only initialize Echo if all required config is available
+if (
+    import.meta.env.VITE_REVERB_APP_KEY &&
+    import.meta.env.VITE_REVERB_HOST &&
+    import.meta.env.VITE_REVERB_PORT
+) {
+    window.Echo = new Echo({
+        broadcaster: 'reverb',
 
-    key: import.meta.env.VITE_REVERB_APP_KEY,
+        key: import.meta.env.VITE_REVERB_APP_KEY,
 
-    wsHost: import.meta.env.VITE_REVERB_HOST,
+        wsHost: import.meta.env.VITE_REVERB_HOST,
 
-    wsPort: Number(
-        import.meta.env.VITE_REVERB_PORT
-    ),
+        wsPort: Number(
+            import.meta.env.VITE_REVERB_PORT
+        ),
 
-    wssPort: Number(
-        import.meta.env.VITE_REVERB_PORT
-    ),
+        wssPort: Number(
+            import.meta.env.VITE_REVERB_PORT
+        ),
 
-    forceTLS: false,
+        forceTLS: false,
 
-    enabledTransports: [
-        'ws',
-        'wss',
-    ],
-})
+        enabledTransports: [
+            'ws',
+            'wss',
+        ],
+    })
+} else {
+    console.warn('Echo/Reverb not configured. Broadcasting features will not work.')
+    window.Echo = null
+}

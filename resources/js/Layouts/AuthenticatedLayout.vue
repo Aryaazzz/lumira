@@ -4,13 +4,14 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import AppFooter from '@/Components/AppFooter.vue';
 import { Link } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
 </script>
 
 <template>
-    <div class="min-h-screen bg-[#f5faf6] text-slate-800">
+    <div class="min-h-screen bg-[#f5faf6] text-slate-800 flex flex-col">
         <nav class="sticky top-0 z-40 border-b border-green-100 bg-white/90 backdrop-blur-xl shadow-sm shadow-green-900/5">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-20 justify-between">
@@ -106,8 +107,10 @@ const showingNavigationDropdown = ref(false);
             </div>
         </header>
 
-        <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <main class="flex-1 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <slot />
         </main>
+
+        <AppFooter />
     </div>
 </template>

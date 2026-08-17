@@ -2,6 +2,7 @@
 import { Head, Link, usePage } from '@inertiajs/vue3'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import AOS from 'aos'
+import AppFooter from '@/Components/AppFooter.vue'
 
 defineProps({
     canLogin: {
@@ -113,7 +114,7 @@ onUnmounted(() => {
 <template>
     <Head title="Lumira - Layanan Ulang Material Ramah" />
 
-    <div class="lumira min-h-screen overflow-x-hidden bg-[#f6f8f6] text-slate-900">
+    <div class="lumira min-h-screen overflow-x-hidden bg-[#f0f5f0] text-slate-900">
 
         <!-- ================================================= -->
         <!-- NAVBAR -->
@@ -189,9 +190,9 @@ onUnmounted(() => {
 
         <section class="relative overflow-hidden pt-14">
 
-            <div class="absolute -right-40 -top-40 h-[550px] w-[550px] rounded-full bg-green-100 blur-3xl"></div>
-            <div class="absolute -bottom-40 -left-40 h-[450px] w-[450px] rounded-full bg-emerald-100/70 blur-3xl"></div>
-            <div class="pointer-events-none absolute left-1/2 top-24 h-72 w-72 -translate-x-1/2 rounded-full bg-amber-100/40 blur-3xl"></div>
+            <div class="absolute -right-40 -top-40 h-[550px] w-[550px] rounded-full bg-green-200/30 blur-3xl"></div>
+            <div class="absolute -bottom-40 -left-40 h-[450px] w-[450px] rounded-full bg-emerald-200/20 blur-3xl"></div>
+            <div class="pointer-events-none absolute left-1/2 top-24 h-72 w-72 -translate-x-1/2 rounded-full bg-green-200/15 blur-3xl"></div>
 
             <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-6 pb-24 pt-10 lg:grid-cols-[1fr_0.9fr] lg:px-8">
 
@@ -275,7 +276,7 @@ onUnmounted(() => {
                 <!-- HERO RIGHT -->
                 <div class="relative mx-auto h-[540px] w-full max-w-xl" data-aos="fade-left" data-aos-duration="1100">
 
-                    <div class="hero-image group absolute right-0 top-5 h-[440px] w-[88%] overflow-hidden rounded-[3rem] bg-gradient-to-br from-[#eafaf1] via-[#f6f8f6] to-[#dff3e6] shadow-2xl shadow-green-950/25">
+                    <div class="hero-image group absolute right-0 top-5 h-[440px] w-[88%] overflow-hidden rounded-[3rem] bg-gradient-to-br from-[#e8f5e9] via-[#f0f5f0] to-[#dceee0] shadow-2xl shadow-green-950/25">
                         <div
                             ref="heroSceneEl"
                             class="absolute inset-0 h-full w-full cursor-grab touch-none active:cursor-grabbing"
@@ -393,7 +394,7 @@ onUnmounted(() => {
         <!-- CATEGORY -->
         <!-- ================================================= -->
 
-        <section class="bg-[#f6f8f6] py-24">
+        <section class="bg-[#f0f5f0] py-24">
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
 
                 <div class="flex flex-wrap items-end justify-between gap-4" data-aos="fade-up">
@@ -487,7 +488,7 @@ onUnmounted(() => {
         <!-- PRODUCT -->
         <!-- ================================================= -->
 
-        <section id="produk" class="bg-[#f6f8f6] py-24">
+        <section id="produk" class="bg-[#f0f5f0] py-24">
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
 
                 <div class="flex flex-wrap items-end justify-between gap-4" data-aos="fade-up">
@@ -647,20 +648,7 @@ onUnmounted(() => {
         <!-- FOOTER -->
         <!-- ================================================= -->
 
-        <footer class="bg-[#06150c] py-10">
-            <div class="mx-auto flex max-w-7xl flex-col justify-between gap-5 px-6 lg:flex-row lg:items-center lg:px-8">
-                <div>
-                    <h3 class="text-xl font-black text-white">LUMIRA</h3>
-                    <p class="mt-1 text-xs font-bold uppercase tracking-[0.15em] text-green-100/40">
-                        Layanan Ulang Material Ramah
-                    </p>
-                </div>
-                <div class="text-sm text-green-100/40 lg:text-right">
-                    <p>Berikan nilai baru pada yang tersisa.</p>
-                    <p class="mt-1">© {{ new Date().getFullYear() }} Lumira.</p>
-                </div>
-            </div>
-        </footer>
+        <AppFooter />
 
     </div>
 </template>

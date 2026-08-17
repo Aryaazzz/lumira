@@ -43,13 +43,11 @@ const submit = () => {
                 <div class="absolute -bottom-40 -left-32 h-[500px] w-[500px] rounded-full bg-emerald-400/10"></div>
 
 
-                <div class="relative z-10 flex w-full flex-col justify-between p-12 xl:p-16">
+                <div class="relative z-10 flex w-full flex-col justify-start p-12 xl:p-16 gap-8">
 
                     <Link href="/" class="flex items-center gap-3">
 
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-lg font-black text-[#14532d] shadow-xl">
-                            L
-                        </div>
+                        <img src="/images/lumira.png" alt="Lumira Logo" class="h-12 w-12">
 
                         <div>
 
@@ -88,7 +86,7 @@ const submit = () => {
                     </div>
 
 
-                    <div class="text-sm text-green-200/60">
+                    <div class="mt-auto text-sm text-green-200/60">
                         © {{ new Date().getFullYear() }} Lumira
                     </div>
 

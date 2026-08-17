@@ -2,6 +2,7 @@
 <script setup>
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { computed, reactive } from 'vue'
+import AppFooter from '@/Components/AppFooter.vue'
 
 const props = defineProps({
     products: {
@@ -251,49 +252,65 @@ const resetFilter = () => {
                 <div
                     v-for="product in productList"
                     :key="product.id"
-                    class="group overflow-hidden rounded-[1.75rem] bg-white shadow-[0_16px_40px_rgba(15,23,42,0.08)] ring-1 ring-slate-200 transition duration-300 hover:-translate-y-2 hover:shadow-[0_28px_60px_rgba(12,124,67,0.18)]"
+                    class="group overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white shadow-[0_10px_35px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-2 hover:border-emerald-200 hover:shadow-[0_24px_60px_rgba(12,124,67,0.16)]"
                 >
                     <div class="relative overflow-hidden">
                         <Link :href="route('marketplace.show', product.id)" class="block">
-                            <img
-                                :src="productImage(product.image)"
-                                :alt="product.name"
-                                class="h-64 w-full object-cover transition duration-500 group-hover:scale-105"
-                            >
+                            <div class="relative overflow-hidden">
+                                <img
+                                    :src="productImage(product.image)"
+                                    :alt="product.name"
+                                    class="h-64 w-full object-cover transition duration-500 group-hover:scale-110"
+                                >
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/20 via-transparent to-transparent"></div>
+                            </div>
                         </Link>
 
-                        <button
-                            v-if="page.props.auth?.user?.role === 'user'"
-                            type="button"
-                            @click.prevent.stop="toggleWishlist(product.id)"
-                            class="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-500 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:text-pink-500"
-                            aria-label="Tambah wishlist"
-                        >
-                            <i class="far fa-heart text-base"></i>
-                        </button>
+                        <div class="absolute inset-x-4 top-4 flex items-center justify-between">
+                            <span class="rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#0c7c43] shadow-sm backdrop-blur-sm">
+                                {{ product.category?.name || 'Baru' }}
+                            </span>
 
-                        <span class="absolute left-4 top-4 rounded-full bg-slate-900/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-lg backdrop-blur-sm">
-                            Baru
-                        </span>
+                            <button
+                                v-if="page.props.auth?.user?.role === 'user'"
+                                type="button"
+                                @click.prevent.stop="toggleWishlist(product.id)"
+                                class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-500 shadow-sm transition hover:border-pink-200 hover:text-pink-500"
+                                aria-label="Tambah wishlist"
+                            >
+                                <i class="far fa-heart text-sm"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <Link :href="route('marketplace.show', product.id)" class="block p-5">
                         <div class="space-y-4">
                             <div>
-                                <p class="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{{ product.store?.name || 'Store' }}</p>
-                                <h3 class="mt-2 line-clamp-2 text-xl font-black text-slate-900">{{ product.name }}</h3>
+                                <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                                    {{ product.store?.name || 'Store' }}
+                                </p>
+                                <h3 class="mt-2 line-clamp-2 text-xl font-black leading-tight text-slate-900">
+                                    {{ product.name }}
+                                </h3>
                             </div>
 
-                            <div class="flex items-center justify-between">
-                                <p class="text-2xl font-black text-[#0c7c43]">{{ formatCurrency(product.price) }}</p>
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-2xl font-black text-[#0c7c43]">{{ formatCurrency(product.price) }}</p>
+                                </div>
                                 <span class="rounded-full bg-[#edf9ee] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#0c7c43]">
                                     {{ product.stock || 0 }} stok
                                 </span>
                             </div>
 
                             <div class="flex items-center justify-between border-t border-slate-100 pt-3 text-sm text-slate-500">
-                                <span><i class="fas fa-star mr-1 text-amber-400"></i>{{ Number(product.sold_count || 0) }} terjual</span>
-                                <span class="font-bold text-slate-700">Lihat detail</span>
+                                <span class="inline-flex items-center gap-1">
+                                    <i class="fas fa-star text-amber-400"></i>
+                                    {{ Number(product.sold_count || 0) }} terjual
+                                </span>
+                                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">
+                                    Lihat detail
+                                </span>
                             </div>
                         </div>
                     </Link>

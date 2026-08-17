@@ -48,43 +48,43 @@ const statusClass = (status = '') => {
         </template>
 
         <div class="p-8">
+            <section>
+                <div
+                    v-for="item in sortedApplications"
+                    v-if="sortedApplications && sortedApplications.length"
+                    :key="item.id"
+                    class="mb-4 rounded border bg-white p-5"
+                >
 
-            <div
-                v-for="item in applications"
-                :key="item.id"
-                class="mb-4 rounded border bg-white p-5"
-            >
+                    <h3 class="font-bold text-lg">
+                        {{ item.store_name }}
+                    </h3>
 
-                <h3 class="font-bold text-lg">
-                    {{ item.store_name }}
-                </h3>
+                    <p>
+                        Pemilik:
+                        {{ item.user.name }}
+                    </p>
 
-                <p>
-                    Pemilik:
-                    {{ item.user.name }}
-                </p>
+                    <p>
+                        Status:
+                        {{ item.status }}
+                    </p>
 
-                <p>
-                    Status:
-                    {{ item.status }}
-                </p>
-
-                        <div class="mt-5 flex flex-wrap gap-3">
-                            <button
-                                v-if="!String(item.status).toLowerCase().includes('approved') && !String(item.status).toLowerCase().includes('disetujui') && !String(item.status).toLowerCase().includes('rejected') && !String(item.status).toLowerCase().includes('ditolak')"
-                                @click="approve(item.id)"
-                                class="rounded-xl bg-[#0c7c43] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-900/15 transition hover:-translate-y-0.5 hover:bg-[#0b2617]"
-                            >
-                                <i class="fas fa-check mr-2"></i>Approve
-                            </button>
-                            <button
-                                v-if="!String(item.status).toLowerCase().includes('approved') && !String(item.status).toLowerCase().includes('disetujui') && !String(item.status).toLowerCase().includes('rejected') && !String(item.status).toLowerCase().includes('ditolak')"
-                                @click="reject(item.id)"
-                                class="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:bg-red-700"
-                            >
-                                <i class="fas fa-times mr-2"></i>Reject
-                            </button>
-                        </div>
+                    <div class="mt-5 flex flex-wrap gap-3">
+                        <button
+                            v-if="!String(item.status).toLowerCase().includes('approved') && !String(item.status).toLowerCase().includes('disetujui') && !String(item.status).toLowerCase().includes('rejected') && !String(item.status).toLowerCase().includes('ditolak')"
+                            @click="approve(item.id)"
+                            class="rounded-xl bg-[#0c7c43] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-900/15 transition hover:-translate-y-0.5 hover:bg-[#0b2617]"
+                        >
+                            <i class="fas fa-check mr-2"></i>Approve
+                        </button>
+                        <button
+                            v-if="!String(item.status).toLowerCase().includes('approved') && !String(item.status).toLowerCase().includes('disetujui') && !String(item.status).toLowerCase().includes('rejected') && !String(item.status).toLowerCase().includes('ditolak')"
+                            @click="reject(item.id)"
+                            class="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:bg-red-700"
+                        >
+                            <i class="fas fa-times mr-2"></i>Reject
+                        </button>
                     </div>
                 </div>
 
