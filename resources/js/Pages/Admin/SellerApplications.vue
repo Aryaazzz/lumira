@@ -47,43 +47,27 @@ const statusClass = (status = '') => {
             </div>
         </template>
 
-        <div class="mx-auto max-w-7xl py-8">
-            <section class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm ring-1 ring-slate-100" data-aos="fade-up">
-                <div class="mb-5 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-bold uppercase tracking-[0.22em] text-[#0c7c43]">Review</p>
-                        <h3 class="mt-2 text-2xl font-black text-slate-900">Daftar Pengajuan</h3>
-                    </div>
-                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#edf9ee] text-[#0c7c43]">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                </div>
+        <div class="p-8">
 
-                <div v-if="applications && applications.length" class="space-y-5">
-                    <div
-                        v-for="item in sortedApplications"
-                        :key="item.id"
-                        class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md"
-                    >
-                        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                            <div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0c7c43] to-[#0b2617] text-lg font-black text-white">
-                                        <i class="fas fa-store"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-xl font-black text-slate-900">{{ item.store_name }}</h3>
-                                        <p class="text-sm text-slate-500">Pemilik: {{ item.user?.name }}</p>
-                                    </div>
-                                </div>
-                            </div>
+            <div
+                v-for="item in applications"
+                :key="item.id"
+                class="mb-4 rounded border bg-white p-5"
+            >
 
-                            <div class="flex flex-wrap items-center gap-3">
-                                <span :class="statusClass(item.status)" class="inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.12em]">
-                                    {{ item.status }}
-                                </span>
-                            </div>
-                        </div>
+                <h3 class="font-bold text-lg">
+                    {{ item.store_name }}
+                </h3>
+
+                <p>
+                    Pemilik:
+                    {{ item.user.name }}
+                </p>
+
+                <p>
+                    Status:
+                    {{ item.status }}
+                </p>
 
                         <div class="mt-5 flex flex-wrap gap-3">
                             <button

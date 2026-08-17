@@ -1,8 +1,34 @@
-/*
- * Bootstrap JavaScript entry.
- *
- * This file is loaded by `resources/js/app.js` and can be used to
- * register global libraries, browser polyfills, or startup behavior.
- */
+import axios from 'axios'
+import Echo from 'laravel-echo'
+import Pusher from 'pusher-js'
 
-// Add any global bootstrap code here.
+window.axios = axios
+
+window.axios.defaults.headers.common[
+    'X-Requested-With'
+] = 'XMLHttpRequest'
+
+window.Pusher = Pusher
+
+window.Echo = new Echo({
+    broadcaster: 'reverb',
+
+    key: import.meta.env.VITE_REVERB_APP_KEY,
+
+    wsHost: import.meta.env.VITE_REVERB_HOST,
+
+    wsPort: Number(
+        import.meta.env.VITE_REVERB_PORT
+    ),
+
+    wssPort: Number(
+        import.meta.env.VITE_REVERB_PORT
+    ),
+
+    forceTLS: false,
+
+    enabledTransports: [
+        'ws',
+        'wss',
+    ],
+})

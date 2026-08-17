@@ -8,19 +8,34 @@ return new class extends Migration
 {
     public function up(): void
 {
-    Schema::table('seller_applications', function (Blueprint $table) {
+    // Guard: only modify table when it exists. Also avoid adding columns
+    // twice if migration is re-run in a non-fresh environment.
+    if (! Schema::hasTable('seller_applications')) {
+        return;
+    }
 
-        $table->text('admin_notes')
-            ->nullable();
+    // Add columns only when they don't already exist
+    if (! Schema::hasColumn('seller_applications', 'admin_notes') ||
+        ! Schema::hasColumn('seller_applications', 'reviewed_at') ||
+        ! Schema::hasColumn('seller_applications', 'reviewed_by')) {
 
-        $table->timestamp('reviewed_at')
-            ->nullable();
+        Schema::table('seller_applications', function (Blueprint $table) {
+            if (! Schema::hasColumn('seller_applications', 'admin_notes')) {
+                $table->text('admin_notes')->nullable();
+            }
 
-        $table->foreignId('reviewed_by')
-            ->nullable()
-            ->constrained('users')
-            ->nullOnDelete();
-    });
+            if (! Schema::hasColumn('seller_applications', 'reviewed_at')) {
+                $table->timestamp('reviewed_at')->nullable();
+            }
+
+            if (! Schema::hasColumn('seller_applications', 'reviewed_by')) {
+                $table->foreignId('reviewed_by')
+                    ->nullable()
+                    ->constrained('users')
+                    ->nullOnDelete();
+            }
+        });
+    }
 }
     public function down(): void
     {

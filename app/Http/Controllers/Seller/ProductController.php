@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -50,6 +51,13 @@ class ProductController extends Controller
             'price' => ['required', 'numeric'],
             'stock' => ['required', 'integer'],
             'image' => ['required', 'image', 'max:2048'],
+
+'images' => ['nullable', 'array'],
+
+'images.*' => [
+    'image',
+    'max:2048'
+],
         ]);
 
         $image = $request->file('image')->store(
@@ -57,17 +65,36 @@ class ProductController extends Controller
             'public'
         );
 
-        Product::create([
-            'store_id' => auth()->user()->store->id,
-            'category_id' => $request->category_id,
-            'name' => $request->name,
-            'slug' => Str::slug($request->name) . '-' . time(),
-            'description' => $request->description,
-            'price' => $request->price,
-            'stock' => $request->stock,
-            'image' => $image,
-            'status' => 'active',
+       $product = Product::create([
+    'store_id' => auth()->user()->store->id,
+    'category_id' => $request->category_id,
+    'name' => $request->name,
+    'slug' => Str::slug($request->name) . '-' . time(),
+    'description' => $request->description,
+    'price' => $request->price,
+    'stock' => $request->stock,
+    'image' => $image,
+    'status' => 'active',
+]);
+
+if ($request->hasFile('images')) {
+
+    foreach (
+        $request->file('images')
+        as $file
+    ) {
+
+        $path = $file->store(
+            'products/gallery',
+            'public'
+        );
+
+        ProductImage::create([
+            'product_id' => $product->id,
+            'image' => $path,
         ]);
+    }
+}
 
         return redirect()
             ->route('seller.products.index')
@@ -76,6 +103,8 @@ class ProductController extends Controller
 
    public function edit(Product $product)
 {
+
+    $product->load('images');
     return Inertia::render(
         'Seller/Products/Edit',
         [
@@ -83,6 +112,27 @@ class ProductController extends Controller
             'categories' => Category::all(),
         ]
     );
+}
+
+public function show(Product $product)
+{
+    $product->load([
+    'images',
+    'category',
+    'store',
+    'orderItems.order.user',
+]);
+
+    // Collect unique buyers who purchased this product
+    $buyers = $product->orderItems
+        ->map(fn($item) => $item->order->user)
+        ->unique('id')
+        ->values();
+
+    return Inertia::render('Seller/Products/Show', [
+        'product' => $product,
+        'buyers' => $buyers,
+    ]);
 }
 
 public function update(
