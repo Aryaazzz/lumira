@@ -152,6 +152,23 @@ const formatCurrency = (value) => {
                 </div>
             </section>
 
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+                <div class="mb-5 flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-slate-800">💬 Percakapan Terbaru</h3>
+                    <Link :href="route('chat.index')" class="text-sm text-blue-600">Lihat Semua</Link>
+                </div>
+
+                <div class="flex items-center justify-center gap-4">
+                    <div class="text-sm text-gray-700">
+                        <span class="font-semibold">Terbaru:</span>
+                        <span v-if="$page.props.conversations && $page.props.conversations.length">{{ $page.props.conversations[0].buyer?.name || 'Pengguna' }}</span>
+                        <span v-else>Belum ada pesan</span>
+                    </div>
+
+                    <Link :href="route('chat.index')" class="bg-indigo-600 text-white px-6 py-3 rounded-lg">Pesan</Link>
+                </div>
+            </section>
+
             <section class="grid gap-4 md:grid-cols-3">
                 <Link
                     :href="route('seller.products.index')"

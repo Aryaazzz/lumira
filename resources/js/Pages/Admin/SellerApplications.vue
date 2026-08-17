@@ -49,7 +49,7 @@ const reject = (id) => {
 
                 <p>
                     Status:
-                    {{ item.status }}
+                    {{ item.seller_status }}
                 </p>
 
                 <div class="mt-3 flex gap-2">

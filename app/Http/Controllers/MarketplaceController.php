@@ -106,10 +106,11 @@ public function index(Request $request)
     }
 
     $product->load([
-        'category',
-        'store.reviews.user',
-    ]);
-
+    'images',
+    'category',
+    'store',
+    'reviews.user',
+]);
     $isWishlisted = false;
 
     if (auth()->check()) {

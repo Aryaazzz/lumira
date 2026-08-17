@@ -30,31 +30,55 @@ const showingNavigationDropdown = ref(false);
                             </div>
 
                             <!-- Navigation Links -->
-                            <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
-                            >
+                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink
                                     :href="route('dashboard')"
                                     :active="route().current('dashboard')"
                                 >
                                     Dashboard
                                 </NavLink>
-                            </div>
 
-                            <Link
-                                :href="route('wishlist.index')"
-                                class="relative inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-pink-50 hover:text-pink-600"
-                            >
-                                <span class="text-base">❤️</span>
-                                <span>Wishlist</span>
-
-                                <span
-                                    v-if="$page.props.wishlistCount > 0"
-                                    class="inline-flex min-w-5 items-center justify-center rounded-full bg-pink-600 px-1.5 py-0.5 text-[10px] font-bold text-white"
+                                <Link
+                                    :href="route('wishlist.index')"
+                                    class="relative inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-pink-50 hover:text-pink-600"
                                 >
-                                    {{ $page.props.wishlistCount }}
-                                </span>
-                            </Link>
+                                    <span class="text-base">❤️</span>
+                                    <span>Wishlist</span>
+
+                                    <span
+                                        v-if="$page.props.wishlistCount > 0"
+                                        class="inline-flex min-w-5 items-center justify-center rounded-full bg-pink-600 px-1.5 py-0.5 text-[10px] font-bold text-white"
+                                    >
+                                        {{ $page.props.wishlistCount }}
+                                    </span>
+                                </Link>
+
+                                <Link
+                                    :href="route('notifications.index')"
+                                    class="relative inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-amber-50 hover:text-amber-600"
+                                >
+                                    <span class="text-base">🔔</span>
+                                    <span>Notifikasi</span>
+
+                                    <span
+                                        v-if="$page.props.notificationsCount > 0"
+                                        class="inline-flex items-center justify-center rounded-full bg-amber-600 px-1.5 py-0.5 text-[10px] font-bold text-white"
+                                    >
+                                        {{ $page.props.notificationsCount }}
+                                    </span>
+                                </Link>
+                                    <Link
+                                        :href="route('chat.index')"
+                                        class="relative inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-700"
+                                        aria-label="Pesan"
+                                    >
+                                        <span class="text-lg">💬</span>
+
+                                        <span v-if="$page.props.unread_messages_count > 0" class="absolute -top-1 -end-1 inline-flex items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                            {{ $page.props.unread_messages_count }}
+                                        </span>
+                                    </Link>
+                            </div>
                         </div>
                         
 
@@ -162,6 +186,9 @@ const showingNavigationDropdown = ref(false);
                         >
                             Dashboard
                         </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('chat.index')">
+                                Pesan
+                            </ResponsiveNavLink>
                     </div>
 
                     <!-- Responsive Settings Options -->

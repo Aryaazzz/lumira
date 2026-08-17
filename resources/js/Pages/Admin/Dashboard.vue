@@ -2,12 +2,82 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
+import {
+    Chart,
+    BarController,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+} from 'chart.js'
 
-defineProps({
+Chart.register(
+    BarController,
+    BarElement,
+    CategoryScale,
+    LinearScale
+)
+import { onMounted, ref, onBeforeUnmount } from 'vue'
+
+// Props must be defined before using them in setup code
+const props = defineProps({
     stats: Object,
     topSeller: Object,
     topProduct: Object,
     latestOrders: Array,
+    salesChart: Array,
+})
+
+const chartRef = ref(null)
+const chartInstance = ref(null)
+
+onMounted(() => {
+    // Guard: only create chart when canvas and data exist
+    if (!chartRef.value || !props.salesChart || !props.salesChart.length) {
+        return
+    }
+
+    // Destroy existing instance if any (prevents duplicates/lag)
+    if (chartInstance.value) {
+        chartInstance.value.destroy()
+        chartInstance.value = null
+    }
+
+    chartInstance.value = new Chart(chartRef.value, {
+        type: 'bar',
+        data: {
+            labels: props.salesChart.map(item => 'Bulan ' + item.month),
+            datasets: [
+                {
+                    label: 'Penjualan',
+                    data: props.salesChart.map(item => item.total),
+                    backgroundColor: 'rgba(59,130,246,0.9)',
+                    borderWidth: 0,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 200,
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                },
+            },
+            plugins: {
+                legend: { display: false },
+            },
+        },
+    })
+})
+
+onBeforeUnmount(() => {
+    if (chartInstance.value) {
+        chartInstance.value.destroy()
+        chartInstance.value = null
+    }
 })
 </script>
 
@@ -160,6 +230,14 @@ defineProps({
                     </p>
                 </div>
 
+            </div>
+
+            <div class="bg-white rounded-xl p-6 shadow mt-6">
+                <h3 class="text-xl font-bold mb-4">Grafik Penjualan</h3>
+
+                <div class="h-64">
+                    <canvas ref="chartRef" class="w-full h-full"></canvas>
+                </div>
             </div>
 
             <!-- TOP SELLER & TOP PRODUCT -->

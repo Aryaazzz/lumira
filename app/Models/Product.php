@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Wishlist;
+use App\Models\OrderItem;
 
 class Product extends Model
 {
@@ -62,4 +63,14 @@ public function wishlistedBy()
         Conversation::class
     );
 }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }

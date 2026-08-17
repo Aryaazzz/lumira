@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Illuminate\Support\Facades\Schema;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -36,13 +37,25 @@ class HandleInertiaRequests extends Middleware
             'user' => $request->user(),
         ],
 
-        'wishlistCount' => fn () =>
-            auth()->check()
-                ? \App\Models\Wishlist::where(
-                    'user_id',
-                    auth()->id()
-                )->count()
-                : 0,
+        'wishlistCount' => function () {
+            // Avoid querying DB during console/migrations or when table doesn't exist
+            if (app()->runningInConsole() || ! Schema::hasTable('wishlists')) {
+                return 0;
+            }
+
+            return auth()->check()
+                ? \App\Models\Wishlist::where('user_id', auth()->id())->count()
+                : 0;
+        },
+        'notificationsCount' => function () {
+            if (app()->runningInConsole() || ! Schema::hasTable('notifications')) {
+                return 0;
+            }
+
+            return auth()->check()
+                ? \App\Models\Notification::where('user_id', auth()->id())->where('is_read', false)->count()
+                : 0;
+        },
     ];
 }
 }

@@ -65,6 +65,10 @@ const removeProduct = (id) => {
                     </p>
 
                     <div class="mt-3 flex gap-2">
+                        <Link :href="route('seller.products.show', product.id)" class="bg-gray-600 text-white px-3 py-2 rounded">Lihat</Link>
+
+                        <Link :href="route('chat.product.latest', product.id)" class="bg-indigo-600 text-white px-3 py-2 rounded">Chat</Link>
+
                         <Link
                             :href="route('seller.products.edit', product.id)"
                             class="bg-blue-600 text-white px-3 py-2 rounded"

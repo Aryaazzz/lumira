@@ -16,6 +16,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\StoreController as PublicStoreController;
 use App\Http\Controllers\WishlistController;
+use Illuminate\Support\Facades\Schema;
 
 use App\Http\Controllers\Admin\SellerApplicationController as AdminSellerApplicationController;
 use App\Http\Controllers\Admin\TopUpController as AdminTopUpController;
@@ -123,10 +124,9 @@ Route::delete(
 
     $user = auth()->user();
 
-    $announcement = \App\Models\Announcement::where(
-        'is_active',
-        true
-    )->latest()->first();
+    $announcement = Schema::hasTable('announcements')
+        ? \App\Models\Announcement::where('is_active', true)->latest()->first()
+        : null;
 
     $recentOrders = \App\Models\Order::with([
     'orderItems.product',
@@ -329,9 +329,26 @@ $topStores = \App\Models\Store::with([
     )->name('chat.start');
 
     Route::get(
+        '/chat/product/{product}/latest',
+        [ChatController::class, 'redirectToLatestConversation']
+    )->name('chat.product.latest');
+
+
+    Route::get(
+        '/chat/latest',
+        [ChatController::class, 'redirectToNewestConversation']
+    )->name('chat.latest');
+
+    Route::get(
         '/chat/{conversation}',
         [ChatController::class, 'show']
     )->name('chat.show');
+
+    // seller -> start chat with specific buyer
+    Route::post(
+        '/chat/start-with/{product}/{buyer}',
+        [ChatController::class, 'startWithBuyer']
+    )->name('chat.startWith');
 
     Route::post(
         '/chat/{conversation}/send',
@@ -382,13 +399,9 @@ Route::get('/seller/dashboard', function () {
 
     ];
 
-    $announcement =
-        \App\Models\Announcement::where(
-            'is_active',
-            true
-        )
-        ->latest()
-        ->first();
+    $announcement = Schema::hasTable('announcements')
+        ? \App\Models\Announcement::where('is_active', true)->latest()->first()
+        : null;
 
     $topProduct = $store
         ->products()
@@ -402,6 +415,12 @@ Route::get('/seller/dashboard', function () {
             'price * sold_count'
         )
     );
+
+    $conversations = \App\Models\Conversation::with(['buyer', 'product'])
+        ->where('seller_id', auth()->id())
+        ->latest()
+        ->take(6)
+        ->get();
 
 $pendingOrders =
     \App\Models\OrderItem::whereHas(
@@ -451,6 +470,7 @@ $completedOrders =
 'completedOrders' => $completedOrders,
 'currentMonthRevenue' => $currentMonthRevenue,
 'store' => $store,
+            'conversations' => $conversations,
         ]
     );
 
@@ -465,6 +485,11 @@ $completedOrders =
         '/seller/products/create',
         [ProductController::class, 'create']
     )->name('seller.products.create');
+
+    Route::get(
+    '/seller/products/{product}',
+    [ProductController::class, 'show']
+)->name('seller.products.show');
 
     Route::get(
     '/seller/products/{product}/edit',

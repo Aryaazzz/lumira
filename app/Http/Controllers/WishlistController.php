@@ -36,6 +36,17 @@ class WishlistController extends Controller
             'product_id' => $product->id,
         ]);
 
+        // Notify the product owner that someone added the product to wishlist
+        if ($product->store && $product->store->user_id !== auth()->id()) {
+            \App\Models\Notification::create([
+                'user_id' => $product->store->user_id,
+                'title' => 'Produk Anda disimpan ke wishlist',
+                'message' => auth()->user()->name . " menambahkan produk Anda ke wishlist.",
+                'type' => 'wishlist',
+                'is_read' => false,
+            ]);
+        }
+
         return back()->with(
             'success',
             'Produk ditambahkan ke wishlist'

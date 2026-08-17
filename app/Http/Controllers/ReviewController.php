@@ -37,15 +37,19 @@ class ReviewController extends Controller
             ],
         ]);
 
-        $storeId = $order
-            ->items
-            ->first()
-            ->product
-            ->store_id;
+        $orderItem = $order->items()->first();
+
+        if (! $orderItem || ! $orderItem->product) {
+            abort(422, 'Produk pada pesanan tidak ditemukan.');
+        }
+
+        $storeId = $orderItem->product->store_id;
+        $productId = $orderItem->product_id;
 
         Review::create([
             'user_id' => auth()->id(),
             'store_id' => $storeId,
+            'product_id' => $productId,
             'order_id' => $order->id,
             'rating' => $request->rating,
             'comment' => $request->comment,
@@ -59,6 +63,17 @@ class ReviewController extends Controller
         );
 
         $store->save();
+
+        // Notify the store owner about the new review
+        if ($store->user_id && $store->user_id !== auth()->id()) {
+            \App\Models\Notification::create([
+                'user_id' => $store->user_id,
+                'title' => 'Produk Anda mendapat review',
+                'message' => auth()->user()->name . " telah memberi review pada toko Anda.",
+                'type' => 'review',
+                'is_read' => false,
+            ]);
+        }
 
         return back()->with(
             'success',
