@@ -16,28 +16,16 @@ const showingNavigationDropdown = ref(false);
                 <div class="flex h-20 justify-between">
                     <div class="flex items-center">
                         <div class="flex shrink-0 items-center">
-                            <Link :href="route('dashboard')" class="group flex items-center gap-3">
-                                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0c7c43] to-[#0b2617] text-lg font-black text-white shadow-lg shadow-green-900/20 transition group-hover:-rotate-6 group-hover:scale-110">
-                                    L
-                                </div>
+                            <Link :href="route('dashboard')" class="group flex items-center gap-3 transition hover:scale-105">
+                                <img src="/images/lumira.png" alt="LUMIRA" class="h-12 w-12" />
                                 <div class="hidden sm:block">
-                                    <div class="text-base font-black tracking-[0.18em] text-[#0b2617]">LUMIRA</div>
-                                    <div class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400">Marketplace</div>
+                                    <p class="text-lg font-black tracking-wide text-[#0b2617]">LUMIRA</p>
+                                    <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">Layanan Ulang Material</p>
                                 </div>
                             </Link>
                         </div>
 
                         <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                            <NavLink :href="route('dashboard')" :active="route().current('dashboard')" class="!text-slate-700 !font-semibold">
-                                Dashboard
-                            </NavLink>
-                            <Link :href="route('wishlist.index')" class="relative inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-pink-50 hover:text-pink-600">
-                                <span class="text-base">❤️</span>
-                                <span>Wishlist</span>
-                                <span v-if="$page.props.wishlistCount > 0" class="inline-flex min-w-5 items-center justify-center rounded-full bg-pink-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                                    {{ $page.props.wishlistCount }}
-                                </span>
-                            </Link>
                         </div>
                     </div>
 
@@ -86,13 +74,6 @@ const showingNavigationDropdown = ref(false);
 
             <div :class="{ block: showingNavigationDropdown, hidden: !showingNavigationDropdown }" class="sm:hidden">
                 <div class="space-y-1 border-t border-green-100 bg-white pb-3 pt-2">
-                    <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')" class="text-slate-700">
-                        Dashboard
-                    </ResponsiveNavLink>
-                    <ResponsiveNavLink :href="route('wishlist.index')" class="flex items-center gap-2 text-slate-700">
-                        <span>❤️</span>
-                        <span>Wishlist</span>
-                    </ResponsiveNavLink>
                 </div>
 
                 <div class="border-t border-green-100 pb-1 pt-4">

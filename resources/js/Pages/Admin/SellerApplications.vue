@@ -1,9 +1,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, router } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
     applications: Array,
+})
+
+const sortedApplications = computed(() => {
+    return [...props.applications].sort((a, b) => a.id - b.id)
 })
 
 const approve = (id) => {
@@ -56,7 +61,7 @@ const statusClass = (status = '') => {
 
                 <div v-if="applications && applications.length" class="space-y-5">
                     <div
-                        v-for="item in applications"
+                        v-for="item in sortedApplications"
                         :key="item.id"
                         class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md"
                     >

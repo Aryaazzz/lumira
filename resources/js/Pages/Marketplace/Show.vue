@@ -7,6 +7,10 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    isWishlisted: {
+        type: Boolean,
+        default: false,
+    },
 })
 
 const quantity = ref(1)
@@ -53,18 +57,77 @@ const addToCart = (productId) => {
         quantity: quantity.value,
     })
 }
+
+const toggleWishlist = (productId) => {
+    if (props.isWishlisted) {
+        router.delete(route('wishlist.destroy', productId), {
+            preserveScroll: true,
+        })
+        return
+    }
+
+    router.post(route('wishlist.store', productId), {}, {
+        preserveScroll: true,
+    })
+}
 </script>
 
 <template>
     <Head :title="product?.name || 'Detail Produk'" />
 
     <div class="min-h-screen bg-[#f5faf6] text-slate-800">
+        <!-- Hero Header -->
+        <div class="bg-gradient-to-br from-[#edf9ee] via-white to-[#f3faf5] px-4 py-8 shadow-sm sm:px-6 lg:px-8" data-aos="fade-down" data-aos-duration="600">
+            <div class="mx-auto max-w-7xl">
+                <nav class="mb-6 flex items-center gap-3 text-sm text-slate-600">
+                    <Link href="/marketplace" class="flex items-center gap-2 font-semibold text-[#0c7c43] transition hover:text-[#0a6d3a]">
+                        <img src="/images/lumira.png" alt="LUMIRA" class="h-12 w-12" />
+                        <div>
+                            <p class="text-sm font-black tracking-wide text-[#0b2617]">LUMIRA</p>
+                            <p class="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500">Marketplace</p>
+                        </div>
+                    </Link>
+                    <span class="text-slate-300">/</span>
+                    <span class="text-slate-700">{{ product?.category?.name || 'Produk' }}</span>
+                    <span class="text-slate-300">/</span>
+                    <span class="line-clamp-1 text-slate-500">{{ product?.name }}</span>
+                </nav>
+                
+                <div class="grid gap-6 lg:grid-cols-2">
+                    <div data-aos="fade-right" data-aos-duration="600" data-aos-delay="100">
+                        <p class="text-xs font-black uppercase tracking-[0.22em] text-[#0c7c43]">
+                            <i class="fas fa-check-circle mr-2"></i>Produk Pilihan
+                        </p>
+                        <h1 class="mt-3 text-3xl font-black text-[#0b2617] md:text-4xl">
+                            {{ product?.name }}
+                        </h1>
+                        <div class="mt-4 flex items-center gap-4">
+                            <div class="flex items-center gap-1 text-amber-400">
+                                <i class="fas fa-star text-sm"></i>
+                                <i class="fas fa-star text-sm"></i>
+                                <i class="fas fa-star text-sm"></i>
+                                <i class="fas fa-star text-sm"></i>
+                                <i class="fas fa-star-half-alt text-sm"></i>
+                            </div>
+                            <span class="text-sm font-bold text-slate-600">{{ product?.store?.rating ?? 0 }}/5 · {{ product?.sold_count || 0 }} terjual</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-end gap-3" data-aos="fade-left" data-aos-duration="600" data-aos-delay="100">
+                        <div class="rounded-2xl bg-white px-5 py-3 shadow-sm ring-1 ring-slate-200">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Dari</p>
+                            <p class="mt-1 font-black text-slate-800">{{ product?.store?.name }}</p>
+                        </div>
+                        <div class="rounded-2xl bg-emerald-50 px-5 py-3 ring-1 ring-emerald-100">
+                            <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">Stok</p>
+                            <p class="mt-1 font-black text-emerald-700">{{ product?.stock ?? 0 }} pcs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-            <nav class="mb-8 flex items-center gap-2 text-sm text-slate-500">
-                <a href="/marketplace" class="font-semibold text-[#0c7c43] transition hover:text-[#0a6d3a]">Marketplace</a>
-                <span>/</span>
-                <span class="text-slate-700">{{ product?.category?.name || 'Produk' }}</span>
-            </nav>
 
             <div class="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
                 <div class="space-y-5">
@@ -113,6 +176,18 @@ const addToCart = (productId) => {
                             <i class="fas fa-star-half-alt"></i>
                         </div>
                         <span class="text-sm font-bold text-slate-600">{{ product?.store?.rating ?? 0 }}/5</span>
+                    </div>
+
+                    <div v-if="$page.props.auth?.user?.role === 'user'" class="mt-5 flex items-center gap-3">
+                        <button
+                            type="button"
+                            @click="toggleWishlist(product.id)"
+                            class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition"
+                            :class="isWishlisted ? 'bg-pink-100 text-pink-700 ring-1 ring-pink-200' : 'bg-slate-100 text-slate-700 ring-1 ring-slate-200 hover:bg-pink-50 hover:text-pink-600'"
+                        >
+                            <i :class="isWishlisted ? 'fas fa-heart' : 'far fa-heart'"></i>
+                            {{ isWishlisted ? 'Sudah di Wishlist' : 'Wishlist' }}
+                        </button>
                     </div>
 
                     <p class="mt-4 text-3xl font-black text-[#0c7c43]">

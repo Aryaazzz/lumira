@@ -1,9 +1,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, router } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
     products: Array,
+})
+
+const sortedProducts = computed(() => {
+    return [...props.products].sort((a, b) => a.id - b.id)
 })
 
 const hideProduct = (id) => {
@@ -68,7 +73,7 @@ const statusClass = (status = false) =>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="product in products" :key="product.id" class="border-b border-slate-100 text-sm text-slate-700 last:border-0">
+                            <tr v-for="product in sortedProducts" :key="product.id" class="border-b border-slate-100 text-sm text-slate-700 last:border-0">
                                 <td class="py-4 pr-4 font-semibold text-slate-900">{{ product.name }}</td>
                                 <td class="py-4 pr-4">{{ product.category?.name ?? '-' }}</td>
                                 <td class="py-4 pr-4">{{ product.store?.name ?? '-' }}</td>

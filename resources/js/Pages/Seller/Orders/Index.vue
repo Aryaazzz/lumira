@@ -1,9 +1,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, router } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
 const props = defineProps({
     orders: { type: Array, default: () => [] },
+})
+
+const sortedOrders = computed(() => {
+    return [...props.orders].sort((a, b) => a.id - b.id)
 })
 
 const formatCurrency = (value) =>
@@ -63,7 +68,7 @@ const completeOrder = (id) => {
 
             <div v-else class="space-y-5">
                 <div
-                    v-for="item in orders"
+                    v-for="item in sortedOrders"
                     :key="item.id"
                     class="overflow-hidden rounded-[2rem] bg-white shadow-[0_18px_42px_rgba(15,23,42,0.08)] ring-1 ring-slate-200 transition duration-300 hover:-translate-y-0.5"
                 >

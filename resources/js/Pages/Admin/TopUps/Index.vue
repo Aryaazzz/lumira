@@ -1,9 +1,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, router } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
     topUps: Array,
+})
+
+const sortedTopUps = computed(() => {
+    return [...props.topUps].sort((a, b) => a.id - b.id)
 })
 
 const approve = (id) => {
@@ -87,7 +92,7 @@ const statusClass = (status = '') => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="topup in topUps" :key="topup.id" class="border-b border-slate-100 text-sm text-slate-700 last:border-0">
+                            <tr v-for="topup in sortedTopUps" :key="topup.id" class="border-b border-slate-100 text-sm text-slate-700 last:border-0">
                                 <td class="py-4 pr-4 font-semibold text-slate-900">{{ topup.user?.name ?? '-' }}</td>
                                 <td class="py-4 pr-4 font-bold text-slate-900">{{ currency(topup.amount) }}</td>
                                 <td class="py-4 pr-4">

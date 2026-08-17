@@ -1,12 +1,17 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
 const props = defineProps({
     stats: Object,
     topSeller: Object,
     topProduct: Object,
     latestOrders: Array,
+})
+
+const sortedLatestOrders = computed(() => {
+    return [...props.latestOrders].sort((a, b) => a.id - b.id)
 })
 
 const quickActions = [
@@ -313,7 +318,7 @@ const statusClass = (status = '') => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="order in latestOrders" :key="order.id" class="border-b border-slate-100 text-sm text-slate-700 last:border-0">
+                            <tr v-for="order in sortedLatestOrders" :key="order.id" class="border-b border-slate-100 text-sm text-slate-700 last:border-0">
                                 <td class="py-4 pr-4 font-semibold text-slate-900">#{{ order.id }}</td>
                                 <td class="py-4 pr-4">{{ order.user?.name ?? '-' }}</td>
                                 <td class="py-4 pr-4 font-bold text-slate-900">{{ currency(order.total_price) }}</td>

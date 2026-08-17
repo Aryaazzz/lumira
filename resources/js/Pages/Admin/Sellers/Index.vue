@@ -2,9 +2,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, router } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
     sellers: Array,
+})
+
+const sortedSellers = computed(() => {
+    return [...props.sellers].sort((a, b) => a.id - b.id)
 })
 
 function warningSeller(id) {
@@ -102,7 +107,7 @@ const statusClass = (isSuspended) =>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200">
-                            <tr v-for="seller in sellers" :key="seller.id" class="hover:bg-slate-50">
+                            <tr v-for="seller in sortedSellers" :key="seller.id" class="hover:bg-slate-50">
                                 <td class="px-4 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[#edf9ee] text-sm font-black text-[#0c7c43]">

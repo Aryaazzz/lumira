@@ -1,9 +1,18 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
     store: Object,
+})
+
+const sortedProducts = computed(() => {
+    return [...props.store.products].sort((a, b) => a.id - b.id)
+})
+
+const sortedReviews = computed(() => {
+    return [...props.store.reviews].sort((a, b) => a.id - b.id)
 })
 </script>
 
@@ -115,7 +124,7 @@ defineProps({
                 >
 
                     <div
-                        v-for="product in store.products"
+                        v-for="product in sortedProducts"
                         :key="product.id"
                         class="bg-white rounded-xl shadow overflow-hidden"
                     >
@@ -190,7 +199,7 @@ defineProps({
                 >
 
                     <div
-                        v-for="review in store.reviews"
+                        v-for="review in sortedReviews"
                         :key="review.id"
                         class="border-b pb-4"
                     >

@@ -1,10 +1,15 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
 const props = defineProps({
     product: Object,
     categories: Array,
+})
+
+const sortedCategories = computed(() => {
+    return [...props.categories].sort((a, b) => a.id - b.id)
 })
 
 const form = useForm({
@@ -58,7 +63,7 @@ function submit() {
                     </option>
 
                     <option
-                        v-for="category in categories"
+                        v-for="category in sortedCategories"
                         :key="category.id"
                         :value="category.id"
                     >

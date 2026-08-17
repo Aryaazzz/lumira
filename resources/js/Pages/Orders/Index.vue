@@ -2,9 +2,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, useForm } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
     orders: Array,
+})
+
+const sortedOrders = computed(() => {
+    return [...props.orders].sort((a, b) => a.id - b.id)
 })
 
 const form = useForm({
@@ -40,7 +45,7 @@ function submitReview(orderId)
                     </h2>
                 </div>
                 <div class="rounded-full bg-white px-4 py-2 text-sm font-bold text-[#0c7c43] shadow-sm ring-1 ring-green-100">
-                    <i class="fas fa-box mr-2"></i>{{ orders.length }} pesanan
+                    <i class="fas fa-box mr-2"></i>{{ sortedOrders.length }} pesanan
                 </div>
             </div>
         </template>
@@ -48,7 +53,7 @@ function submitReview(orderId)
         <div class="min-h-screen overflow-x-hidden bg-[#f6f8f6]">
             <!-- Empty State -->
             <div
-                v-if="orders.length === 0"
+                v-if="sortedOrders.length === 0"
                 class="mx-auto max-w-7xl px-6 py-16 lg:px-8"
                 data-aos="fade-up"
             >
@@ -68,7 +73,7 @@ function submitReview(orderId)
             <!-- Orders List -->
             <div v-else class="mx-auto max-w-7xl px-6 py-8 lg:px-8 space-y-4">
                 <div
-                    v-for="(order, idx) in orders"
+                    v-for="(order, idx) in sortedOrders"
                     :key="order.id"
                     data-aos="fade-up"
                     :data-aos-delay="idx * 50"

@@ -1,9 +1,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, router } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
     notifications: Array
+})
+
+const sortedNotifications = computed(() => {
+    return [...props.notifications].sort((a, b) => a.id - b.id)
 })
 
 function read(id)
@@ -69,7 +74,7 @@ function readAll()
                 <!-- Notifications List -->
                 <div v-else class="space-y-3">
                     <div
-                        v-for="(notification, idx) in notifications"
+                        v-for="(notification, idx) in sortedNotifications"
                         :key="notification.id"
                         data-aos="fade-up"
                         :data-aos-delay="idx * 30"

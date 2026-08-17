@@ -1,9 +1,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link, router } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
 const props = defineProps({
     products: Array,
+})
+
+const sortedProducts = computed(() => {
+    return [...props.products].sort((a, b) => a.id - b.id)
 })
 
 function destroyProduct(id) {
@@ -236,7 +241,7 @@ function destroyProduct(id) {
                             <tr
                                 v-for="
                                     product
-                                    in products
+                                    in sortedProducts
                                 "
                                 :key="
                                     product.id

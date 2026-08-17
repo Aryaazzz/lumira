@@ -1,9 +1,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link, router } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
 const props = defineProps({
     products: { type: Array, default: () => [] },
+})
+
+const sortedProducts = computed(() => {
+    return [...props.products].sort((a, b) => a.id - b.id)
 })
 
 const formatCurrency = (value) =>
@@ -79,7 +84,7 @@ const totalRevenue = props.products.reduce((sum, product) => sum + Number(produc
 
             <div v-else class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 <div
-                    v-for="product in products"
+                    v-for="product in sortedProducts"
                     :key="product.id"
                     class="group overflow-hidden rounded-[1.75rem] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)] ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-[0_25px_60px_rgba(12,124,67,0.15)]"
                 >

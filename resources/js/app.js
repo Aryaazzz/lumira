@@ -1,7 +1,7 @@
 import '../css/app.css'
 import './bootstrap'
 
-import { createInertiaApp } from '@inertiajs/vue3'
+import { createInertiaApp, router } from '@inertiajs/vue3'
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 import { createApp, h } from 'vue'
 import { ZiggyVue } from '../../vendor/tightenco/ziggy'
@@ -12,10 +12,16 @@ import 'aos/dist/aos.css'
 const appName = import.meta.env.VITE_APP_NAME || 'Lumira'
 
 AOS.init({
-    duration: 900,
+    duration: 800,
     easing: 'ease-out-cubic',
     once: true,
-    offset: 80,
+    offset: 40,
+    mirror: false,
+    disableMutationObserver: false,
+})
+
+router.on('finish', () => {
+    AOS.refreshHard()
 })
 
 createInertiaApp({

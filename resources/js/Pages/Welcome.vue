@@ -126,11 +126,7 @@ onUnmounted(() => {
             <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3 lg:px-8">
 
                 <Link href="/" class="group flex shrink-0 items-center gap-3">
-                    <div class="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#0c7c43] to-[#0b2617] shadow-lg shadow-green-900/25 transition duration-500 group-hover:-rotate-6 group-hover:scale-110">
-                        <div class="absolute -right-2 -top-2 h-7 w-7 rounded-full bg-[#22c55e]/30"></div>
-                        <div class="absolute -bottom-3 -left-2 h-7 w-7 rounded-full bg-white/10"></div>
-                        <span class="relative text-lg font-black tracking-tight text-white">L</span>
-                    </div>
+                    <img src="/images/lumira.png" alt="LUMIRA" class="h-11 w-11" />
                     <div class="hidden sm:block">
                         <h1 class="text-xl font-black leading-none tracking-tight text-[#0b2617]">LUMIRA</h1>
                         <p class="mt-1 text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400">

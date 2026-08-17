@@ -1,9 +1,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
     topUps: Array,
+})
+
+const sortedTopUps = computed(() => {
+    return [...props.topUps].sort((a, b) => a.id - b.id)
 })
 </script>
 
@@ -51,7 +56,7 @@ defineProps({
                     <!-- Table Body -->
                     <div class="divide-y divide-slate-100">
                         <div
-                            v-for="(topup, idx) in topUps"
+                            v-for="(topup, idx) in sortedTopUps"
                             :key="topup.id"
                             data-aos="fade-up"
                             :data-aos-delay="idx * 30"

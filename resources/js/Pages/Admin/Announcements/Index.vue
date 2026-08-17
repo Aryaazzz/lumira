@@ -1,9 +1,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, useForm } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
 const props = defineProps({
     announcements: Array,
+})
+
+const sortedAnnouncements = computed(() => {
+    return [...props.announcements].sort((a, b) => a.id - b.id)
 })
 
 const form = useForm({
@@ -73,7 +78,7 @@ const submit = () => {
                 </div>
 
                 <div v-if="announcements && announcements.length" class="space-y-4">
-                    <div v-for="announcement in announcements" :key="announcement.id" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+                    <div v-for="announcement in sortedAnnouncements" :key="announcement.id" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
                         <div class="flex items-center gap-3">
                             <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#edf9ee] text-[#0c7c43]">
                                 <i class="fas fa-bell"></i>

@@ -1,13 +1,27 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { Head, router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { Head, router, usePage } from '@inertiajs/vue3'
+import { nextTick, onMounted, ref, watch, computed } from 'vue'
 
 const props = defineProps({
     conversation: Object,
 })
 
+const sortedMessages = computed(() => {
+    return [...props.conversation.messages].sort((a, b) => a.id - b.id)
+})
+
+const page = usePage()
 const message = ref('')
+const chatBox = ref(null)
+
+const scrollToBottom = () => {
+    nextTick(() => {
+        if (chatBox.value) {
+            chatBox.value.scrollTop = chatBox.value.scrollHeight
+        }
+    })
+}
 
 const sendMessage = () => {
     if (!message.value) return
@@ -19,10 +33,21 @@ const sendMessage = () => {
             preserveScroll: true,
             onSuccess: () => {
                 message.value = ''
+                scrollToBottom()
             },
         }
     )
 }
+
+onMounted(() => {
+    scrollToBottom()
+})
+
+watch(
+    () => props.conversation?.messages,
+    () => scrollToBottom(),
+    { deep: true }
+)
 </script>
 
 <template>
@@ -50,12 +75,15 @@ const sendMessage = () => {
                     </div>
                 </div>
 
-                <div class="h-[500px] overflow-y-auto rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                    <div v-for="msg in conversation.messages" :key="msg.id" class="mb-4 flex flex-col">
-                        <div class="mb-1 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
+                <div ref="chatBox" class="h-[500px] overflow-y-auto rounded-[1.5rem] border border-slate-200 bg-gradient-to-b from-slate-50 to-white p-4">
+                    <div v-for="msg in sortedMessages" :key="msg.id" class="mb-4 flex flex-col">
+                        <div class="mb-1 text-xs font-bold uppercase tracking-[0.12em] text-slate-400" :class="msg.sender?.id === page.props.auth?.user?.id ? 'self-end' : 'self-start'">
                             {{ msg.sender?.name }}
                         </div>
-                        <div :class="msg.sender?.id === conversation.user?.id ? 'ml-auto bg-[#0c7c43] text-white' : 'mr-auto bg-white text-slate-700 ring-1 ring-slate-200'" class="max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm">
+                        <div
+                            :class="msg.sender?.id === page.props.auth?.user?.id ? 'ml-auto bg-[#0c7c43] text-white' : 'mr-auto bg-white text-slate-700 ring-1 ring-slate-200'"
+                            class="max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm"
+                        >
                             {{ msg.message }}
                         </div>
                     </div>

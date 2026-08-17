@@ -1,10 +1,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, useForm } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
     categories: { type: Array, default: () => [] },
+})
+
+const sortedCategories = computed(() => {
+    return [...props.categories].sort((a, b) => a.id - b.id)
 })
 
 const previewImage = ref('')
@@ -66,7 +70,7 @@ function submit() {
                                 <label class="mb-2 block text-sm font-bold text-slate-700">Kategori</label>
                                 <select v-model="form.category_id" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-800 outline-none transition focus:border-[#0c7c43] focus:bg-white focus:ring-4 focus:ring-green-100">
                                     <option value="">Pilih Kategori</option>
-                                    <option v-for="category in categories" :key="category.id" :value="category.id">
+                                    <option v-for="category in sortedCategories" :key="category.id" :value="category.id">
                                         {{ category.name }}
                                     </option>
                                 </select>

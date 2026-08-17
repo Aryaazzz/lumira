@@ -47,27 +47,47 @@ const statsCards = computed(() => [
         label: 'Saldo',
         value: formatCurrency(props.stats.balance),
         tone: 'emerald',
-        icon: '💰',
+        icon: 'fa-wallet',
+        badgeClass: 'bg-slate-100 text-slate-500',
     },
     {
         label: 'Total Pesanan',
         value: props.stats.orders ?? 0,
         tone: 'blue',
-        icon: '📦',
+        icon: 'fa-box',
+        badgeClass: 'bg-slate-100 text-slate-500',
     },
     {
         label: 'Sedang Dikirim',
         value: props.stats.shippedOrders ?? 0,
         tone: 'amber',
-        icon: '🚚',
+        icon: 'fa-truck',
+        badgeClass: 'bg-slate-100 text-slate-500',
     },
     {
         label: 'Wishlist',
         value: props.stats.wishlistCount ?? 0,
         tone: 'pink',
-        icon: '❤️',
+        icon: 'fa-heart',
+        badgeClass: 'bg-slate-100 text-slate-500',
     },
 ])
+
+const sortedRecentOrders = computed(() => {
+    return [...props.recentOrders].sort((a, b) => b.id - a.id)
+})
+
+const sortedBestSellingProducts = computed(() => {
+    return [...props.bestSellingProducts].sort((a, b) => a.id - b.id)
+})
+
+const sortedLatestProducts = computed(() => {
+    return [...props.latestProducts].sort((a, b) => b.id - a.id)
+})
+
+const sortedTopStores = computed(() => {
+    return [...props.topStores].sort((a, b) => a.id - b.id)
+})
 </script>
 
 <template>
@@ -109,6 +129,50 @@ const statsCards = computed(() => [
         </template>
 
         <div class="mx-auto max-w-7xl py-8">
+            <div class="mb-8 overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0b2617] via-[#0c7c43] to-[#14532d] p-6 text-white shadow-[0_24px_60px_rgba(12,124,67,0.28)] md:p-8" data-aos="fade-up">
+                <div class="grid gap-6 lg:grid-cols-[1.4fr_0.6fr] lg:items-center">
+                    <div>
+                        <p class="text-xs font-black uppercase tracking-[0.28em] text-emerald-100">Lumira Marketplace</p>
+                        <h1 class="mt-3 text-3xl font-black leading-tight md:text-5xl">Beli produk ramah lingkungan dengan gaya yang lebih modern.</h1>
+                        <p class="mt-4 max-w-xl text-sm leading-7 text-emerald-50 md:text-base">
+                            Temukan barang daur ulang pilihan, dukung usaha lokal, dan nikmati pengalaman belanja yang lebih cepat, aman, dan nyaman.
+                        </p>
+                        <div class="mt-5 flex flex-wrap gap-3">
+                            <Link :href="route('marketplace')" class="rounded-2xl bg-white px-5 py-3 text-sm font-black text-[#0c7c43] shadow-lg shadow-black/10 transition hover:-translate-y-0.5">
+                                Jelajahi Produk
+                            </Link>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <div class="absolute -left-8 top-2 h-24 w-24 rounded-full bg-emerald-300/30 blur-2xl"></div>
+                        <div class="absolute -right-4 bottom-0 h-28 w-28 rounded-full bg-lime-300/30 blur-2xl"></div>
+                        <div class="relative rounded-[1.8rem] border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
+                            <div class="rounded-[1.5rem] bg-white/95 p-4 text-slate-800 shadow-2xl">
+                                <p class="text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">Trend hari ini</p>
+                                <div class="mt-4 flex items-center gap-3">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-2xl text-emerald-600">♻️</div>
+                                    <div>
+                                        <h3 class="text-lg font-black">Produk Ramah Lingkungan</h3>
+                                        <p class="text-sm text-slate-500">Pilihan paling laris minggu ini</p>
+                                    </div>
+                                </div>
+                                <div class="mt-5 grid grid-cols-2 gap-3 text-center">
+                                    <div class="rounded-2xl bg-emerald-50 p-3">
+                                        <p class="text-2xl font-black text-[#0c7c43]">1.2k</p>
+                                        <p class="text-xs font-bold text-slate-500">Pembeli</p>
+                                    </div>
+                                    <div class="rounded-2xl bg-amber-50 p-3">
+                                        <p class="text-2xl font-black text-amber-600">4.9</p>
+                                        <p class="text-xs font-bold text-slate-500">Rating</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div v-if="page.props.flash?.error" class="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
                 {{ page.props.flash.error }}
             </div>
@@ -126,7 +190,7 @@ const statsCards = computed(() => [
             </div>
 
             <div class="mb-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-                <div v-for="(stat, index) in statsCards" :key="index" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md">
+                <div v-for="(stat, index) in statsCards" :key="index" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md" data-aos="fade-up" :data-aos-delay="`${index * 100}`" data-aos-duration="600">
                     <div class="flex items-start justify-between gap-3">
                         <div>
                             <p class="text-sm font-medium text-slate-500">{{ stat.label }}</p>
@@ -134,8 +198,8 @@ const statsCards = computed(() => [
                                 {{ stat.value }}
                             </h2>
                         </div>
-                        <div class="flex h-11 w-11 items-center justify-center rounded-xl text-xl shadow-sm" :class="{ 'bg-emerald-100 text-emerald-600': stat.tone === 'emerald', 'bg-blue-100 text-blue-600': stat.tone === 'blue', 'bg-amber-100 text-amber-600': stat.tone === 'amber', 'bg-pink-100 text-pink-600': stat.tone === 'pink' }">
-                            {{ stat.icon }}
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl shadow-sm" :class="stat.badgeClass">
+                            <i :class="['fas', stat.icon, 'text-lg']"></i>
                         </div>
                     </div>
                 </div>
@@ -156,7 +220,7 @@ const statsCards = computed(() => [
                 </div>
 
                 <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <Link :href="route('marketplace')" class="group rounded-2xl bg-gradient-to-br from-[#0c7c43] to-[#0b2617] p-6 text-white shadow-lg shadow-green-900/20 transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                    <Link :href="route('marketplace')" class="group rounded-2xl bg-gradient-to-br from-[#0c7c43] to-[#0b2617] p-6 text-white shadow-lg shadow-green-900/20 transition duration-300 hover:-translate-y-1 hover:shadow-2xl" data-aos="fade-up" data-aos-delay="0" data-aos-duration="600">
                         <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-2xl">
                             <i class="fas fa-store"></i>
                         </div>
@@ -164,7 +228,7 @@ const statsCards = computed(() => [
                         <p class="mt-2 text-sm text-green-50">Jelajahi produk daur ulang</p>
                     </Link>
 
-                    <Link :href="route('cart.index')" class="group rounded-2xl bg-gradient-to-br from-[#f3f7f5] to-[#ebf8f0] p-6 text-slate-800 ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/10">
+                    <Link :href="route('cart.index')" class="group rounded-2xl bg-gradient-to-br from-[#f3f7f5] to-[#ebf8f0] p-6 text-slate-800 ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/10" data-aos="fade-up" data-aos-delay="100" data-aos-duration="600">
                         <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white text-2xl text-slate-500">
                             <i class="fas fa-shopping-cart"></i>
                         </div>
@@ -172,7 +236,7 @@ const statsCards = computed(() => [
                         <p class="mt-2 text-sm text-slate-500">Produk yang sudah Anda pilih</p>
                     </Link>
 
-                    <Link :href="route('wishlist.index')" class="group rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 p-6 text-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg">
+                    <Link :href="route('wishlist.index')" class="group rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 p-6 text-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg" data-aos="fade-up" data-aos-delay="200" data-aos-duration="600">
                         <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 text-2xl shadow-inner">
                             <i class="fas fa-heart"></i>
                         </div>
@@ -180,7 +244,7 @@ const statsCards = computed(() => [
                         <p class="mt-2 text-sm text-pink-50">Produk favorit yang disimpan</p>
                     </Link>
 
-                    <Link v-if="$page.props.auth.user.seller_status !== 'suspended'" :href="route('seller.apply')" class="group rounded-2xl bg-gradient-to-br from-[#edf9ee] to-[#e4f8e7] p-6 text-slate-800 ring-1 ring-green-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/10">
+                    <Link v-if="$page.props.auth.user.seller_status !== 'suspended'" :href="route('seller.apply')" class="group rounded-2xl bg-gradient-to-br from-[#edf9ee] to-[#e4f8e7] p-6 text-slate-800 ring-1 ring-green-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/10" data-aos="fade-up" data-aos-delay="300" data-aos-duration="600">
                         <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white text-2xl text-[#0c7c43]">
                             <i class="fas fa-seedling"></i>
                         </div>
@@ -188,7 +252,7 @@ const statsCards = computed(() => [
                         <p class="mt-2 text-sm text-slate-500">Mulai jualan dan bangun bisnis Anda</p>
                     </Link>
 
-                    <div v-else class="rounded-2xl bg-slate-100 p-6 text-slate-600 ring-1 ring-slate-200">
+                    <div v-else class="rounded-2xl bg-slate-100 p-6 text-slate-600 ring-1 ring-slate-200" data-aos="fade-up" data-aos-delay="300" data-aos-duration="600">
                         <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white text-2xl text-slate-500">
                             <i class="fas fa-ban"></i>
                         </div>
@@ -208,7 +272,7 @@ const statsCards = computed(() => [
                     </div>
 
                     <div class="space-y-3">
-                        <div v-for="order in recentOrders" :key="order.id" class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                        <div v-for="order in sortedRecentOrders" :key="order.id" class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                             <div>
                                 <p class="font-semibold text-slate-800">Order #{{ order.id }}</p>
                                 <p class="text-sm text-slate-500">{{ order.created_at }}</p>
@@ -229,7 +293,7 @@ const statsCards = computed(() => [
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2">
-                        <div v-for="product in bestSellingProducts" :key="product.id" class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition duration-200 hover:-translate-y-0.5 hover:shadow-sm">
+                        <div v-for="product in sortedBestSellingProducts" :key="product.id" class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition duration-200 hover:-translate-y-0.5 hover:shadow-sm">
                             <img :src="'/storage/' + product.image" class="h-36 w-full object-cover" />
                             <div class="p-4">
                                 <h3 class="line-clamp-2 text-base font-bold text-slate-800">{{ product.name }}</h3>
@@ -247,9 +311,9 @@ const statsCards = computed(() => [
             </div>
 
             <div class="mt-10">
-                <h2 class="mb-4 text-2xl font-bold text-slate-800">🏆 Seller Terbaik</h2>
+                <h2 class="mb-4 text-2xl font-bold text-slate-800"><i class="fas fa-crown mr-2 text-slate-500"></i>Seller Terbaik</h2>
                 <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-                    <div v-for="(store, index) in topStores" :key="store.id" class="flex items-center justify-between border-b border-slate-200 p-4 last:border-b-0">
+                    <div v-for="(store, index) in sortedTopStores" :key="store.id" class="flex items-center justify-between border-b border-slate-200 p-4 last:border-b-0">
                         <div class="flex items-center gap-4">
                             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-500 font-bold text-white">
                                 {{ index + 1 }}
@@ -260,7 +324,7 @@ const statsCards = computed(() => [
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="font-bold text-yellow-600">⭐ {{ store.rating ?? 0 }}</div>
+                            <div class="font-bold text-yellow-600"><i class="fas fa-star mr-1 text-slate-500"></i>{{ store.rating ?? 0 }}</div>
                             <Link
                                 v-if="store.slug"
                                 :href="route('store.show', store.slug)"
@@ -282,7 +346,7 @@ const statsCards = computed(() => [
                 </div>
 
                 <div v-if="latestProducts.length" class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-                    <div v-for="product in latestProducts" :key="product.id" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md">
+                    <div v-for="product in sortedLatestProducts" :key="product.id" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md">
                         <img :src="'/storage/' + product.image" class="h-44 w-full object-cover" />
                         <div class="p-4">
                             <h3 class="line-clamp-2 text-base font-bold text-slate-800">{{ product.name }}</h3>

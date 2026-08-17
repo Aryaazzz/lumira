@@ -79,17 +79,9 @@ Route::post(
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
-<<<<<<< HEAD
-        return match (auth()->user()->role) {
-            'admin' => redirect()->route('admin.dashboard'),
-            'seller' => redirect()->route('seller.dashboard'),
-            default => redirect('/'),
-        };
-=======
         if (! $user) {
             return redirect()->route('login');
         }
->>>>>>> ee68709b7ebaa861e7bdfa6109fb2e21f04a7fb5
 
         if ($user->seller_status === 'suspended') {
             return redirect()->route('user.dashboard')->with(
@@ -128,13 +120,11 @@ Route::delete(
     */
 
    Route::get('/user/dashboard', function () {
-
-<<<<<<< HEAD
-        Route::get('/user/dashboard', function () {
-            return redirect('/');
-        })->name('user.dashboard');
-=======
     $user = auth()->user();
+
+    if (! $user) {
+        return redirect()->route('login');
+    }
 
     $announcement = \App\Models\Announcement::where(
         'is_active',
@@ -142,83 +132,53 @@ Route::delete(
     )->latest()->first();
 
     $recentOrders = \App\Models\Order::with([
-    'orderItems.product',
-])
-->where(
-    'user_id',
-    $user->id
-)
-->latest()
-->take(5)
-->get();
+        'orderItems.product',
+    ])
+        ->where('user_id', $user->id)
+        ->latest()
+        ->take(5)
+        ->get();
 
-$bestSellingProducts = \App\Models\Product::with([
-    'store',
-    'category',
-])
-->where('status', 'active')
-->orderByDesc('sold_count')
-->take(4)
-->get();
+    $bestSellingProducts = \App\Models\Product::with([
+        'store',
+        'category',
+    ])
+        ->where('status', 'active')
+        ->orderByDesc('sold_count')
+        ->take(4)
+        ->get();
 
-$topStores = \App\Models\Store::with([
-    'user',
-])
-->withCount('reviews')
-->orderByDesc('rating')
-->take(5)
-->get();
+    $topStores = \App\Models\Store::with([
+        'user',
+    ])
+        ->withCount('reviews')
+        ->orderByDesc('rating')
+        ->take(5)
+        ->get();
 
-    return Inertia::render(
-        'DashboardUser',
-        [
-            'announcement' => $announcement,
-            'recentOrders' => $recentOrders,
-            'bestSellingProducts' => $bestSellingProducts,
-            'topStores' => $topStores,
-
-            'stats' => [
-
-                'balance' => $user->balance,
-
-                'orders' =>
-                    \App\Models\Order::where(
-                        'user_id',
-                        $user->id
-                    )->count(),
-
-                'shippedOrders' =>
-                    \App\Models\Order::where(
-                        'user_id',
-                        $user->id
-                    )
-                    ->where(
-                        'status',
-                        'shipped'
-                    )
-                    ->count(),
-
-                'wishlistCount' =>
-                    \App\Models\Wishlist::where(
-                        'user_id',
-                        $user->id
-                    )->count(),
-            ],
-
-            'latestProducts' => \App\Models\Product::with([
-    'category',
-    'store',
-
-])
-->where('status', 'active')
-->latest()
-->take(4)
-->get(),
-        ]
-    );
-
+    return Inertia::render('DashboardUser', [
+        'announcement' => $announcement,
+        'recentOrders' => $recentOrders,
+        'bestSellingProducts' => $bestSellingProducts,
+        'topStores' => $topStores,
+        'stats' => [
+            'balance' => $user->balance,
+            'orders' => \App\Models\Order::where('user_id', $user->id)->count(),
+            'shippedOrders' => \App\Models\Order::where('user_id', $user->id)
+                ->where('status', 'shipped')
+                ->count(),
+            'wishlistCount' => \App\Models\Wishlist::where('user_id', $user->id)->count(),
+        ],
+        'latestProducts' => \App\Models\Product::with([
+            'category',
+            'store',
+        ])
+            ->where('status', 'active')
+            ->latest()
+            ->take(4)
+            ->get(),
+    ]);
 })->name('user.dashboard');
->>>>>>> ee68709b7ebaa861e7bdfa6109fb2e21f04a7fb5
 
     /*
     |--------------------------------------------------------------------------
