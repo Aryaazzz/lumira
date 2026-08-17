@@ -213,11 +213,32 @@ const formatCurrency = (value) => {
                 </Link>
 
                 <Link
-    :href="route('seller.store.edit')"
-    class="bg-indigo-600 text-white rounded-xl p-6 shadow"
->
-    🏪 Profil Toko
-</Link>
+                    :href="route('seller.withdrawals.index')"
+                    class="group rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 p-6 text-white shadow-lg transition-transform duration-200 hover:-translate-y-1"
+                >
+                    <div class="flex items-center justify-between">
+                        <span class="text-3xl">💸</span>
+                        <span class="rounded-full bg-white/15 px-2 py-1 text-xs">Penarikan</span>
+                    </div>
+                    <h3 class="mt-6 text-xl font-bold">Withdrawals</h3>
+                    <p class="mt-2 text-sm text-amber-100">
+                        Cek saldo dan ajukan penarikan dana.
+                    </p>
+                </Link>
+
+                <Link
+                    :href="route('seller.store.edit')"
+                    class="group rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-500 p-6 text-white shadow-lg transition-transform duration-200 hover:-translate-y-1"
+                >
+                    <div class="flex items-center justify-between">
+                        <span class="text-3xl">🏪</span>
+                        <span class="rounded-full bg-white/15 px-2 py-1 text-xs">Profil</span>
+                    </div>
+                    <h3 class="mt-6 text-xl font-bold">Profil Toko</h3>
+                    <p class="mt-2 text-sm text-indigo-100">
+                        Ubah data toko dan profil bisnis Anda.
+                    </p>
+                </Link>
             </section>
 
             <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">

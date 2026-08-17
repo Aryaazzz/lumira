@@ -13,6 +13,7 @@ const props = defineProps({
     },
 })
 
+
 const selectedImage = ref(null)
 
 const productReviews = computed(() => {
@@ -54,6 +55,12 @@ const startChat = (productId) => {
 const addToCart = () => {
     router.post(route('cart.add', props.product?.id), {}, {
         preserveScroll: true,
+        onSuccess: () => {
+            window.alert('Produk berhasil ditambahkan ke keranjang.')
+        },
+        onError: () => {
+            window.alert('Gagal menambahkan produk ke keranjang.')
+        },
     })
 }
 

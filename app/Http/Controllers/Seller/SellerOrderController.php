@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use App\Models\OrderItem;
+use Illuminate\Support\Facades\DB;
 
 class SellerOrderController extends Controller
 {
@@ -85,14 +86,20 @@ class SellerOrderController extends Controller
             return back()->with('error', 'Pesanan belum dikirim, tidak dapat diselesaikan.');
         }
 
-        $orderItem->order->update([
+        $order = $orderItem->order;
+        $order->update([
             'status' => 'completed',
         ]);
 
         $seller = $orderItem->product->store->user;
-        $totalIncome = $orderItem->price * $orderItem->quantity;
+        $itemTotal = $orderItem->price * $orderItem->quantity;
+        $orderTotal = $order->items()->sum(DB::raw('price * quantity'));
 
-        $seller->increment('balance', $totalIncome);
+        $itemShare = $orderTotal > 0 ? ($itemTotal / $orderTotal) : 1;
+        $sellerShare = $order->seller_income ?? $order->total_price;
+        $grossIncome = $sellerShare * $itemShare;
+
+        $seller->increment('balance', $grossIncome);
 
         Notification::create([
             'user_id' => $orderItem->order->user_id,

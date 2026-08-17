@@ -90,6 +90,19 @@ const sendMessage = () => {
         return
     }
 
+    const optimisticMessage = {
+        id: Date.now(),
+        conversation_id: props.conversation.id,
+        message: text,
+        sender_id: currentUser.id,
+        sender: {
+            id: currentUser.id,
+            name: currentUser.name,
+        },
+        created_at: new Date().toISOString(),
+    }
+
+    messages.value.push(optimisticMessage)
     message.value = ''
     scrollToBottom()
 
@@ -99,6 +112,14 @@ const sendMessage = () => {
         {
             preserveScroll: true,
             onError: () => {
+                const index = messages.value.findIndex(
+                    (msg) => Number(msg.id) === Number(optimisticMessage.id)
+                )
+
+                if (index !== -1) {
+                    messages.value.splice(index, 1)
+                }
+
                 message.value = text
             },
         }

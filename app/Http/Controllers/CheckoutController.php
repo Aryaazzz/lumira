@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Notification;
+use App\Models\Voucher;
+use App\Models\PlatformSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -16,6 +18,9 @@ class CheckoutController extends Controller
             'payment_method' => [
                 'required',
                 'in:balance,cod',
+            ],
+            'voucher_code' => [
+                'nullable',
             ],
         ]);
 
@@ -50,10 +55,83 @@ class CheckoutController extends Controller
 
         }
 
-        if (
-            $request->payment_method === 'balance' &&
-            $user->balance < $total
-        ) {
+       $voucher = null;
+$discount = 0;
+
+if ($request->filled('voucher_code')) {
+
+    $voucher = Voucher::where(
+        'code',
+        strtoupper(
+            trim(
+                $request->voucher_code
+            )
+        )
+    )->first();
+
+    if (! $voucher) {
+
+        return back()->with(
+            'error',
+            'Kode voucher tidak ditemukan.'
+        );
+    }
+
+    if (! $voucher->is_active) {
+
+        return back()->with(
+            'error',
+            'Voucher sudah tidak aktif.'
+        );
+    }
+
+    if (! $voucher->isApplicableToUser($user)) {
+        return back()->with(
+            'error',
+            'Voucher ini tidak berlaku untuk akun Anda.'
+        );
+    }
+
+    if (
+        $voucher->expired_at &&
+        now()->gt(
+            $voucher->expired_at
+        )
+    ) {
+
+        return back()->with(
+            'error',
+            'Voucher sudah kadaluarsa.'
+        );
+    }
+
+    if (
+        $voucher->type ===
+        'percentage'
+    ) {
+
+        $discount =
+            ($total * $voucher->value)
+            / 100;
+
+    } else {
+
+        $discount =
+            $voucher->value;
+    }
+
+    if ($discount > $total) {
+        $discount = $total;
+    }
+}
+
+$finalTotal =
+    $total - $discount;
+
+       if (
+    $request->payment_method === 'balance' &&
+    $user->balance < $finalTotal
+) {
             return back()->with(
                 'error',
                 'Saldo tidak cukup'
@@ -61,20 +139,23 @@ class CheckoutController extends Controller
         }
 
         DB::transaction(function () use (
-            $cart,
-            $user,
-            $total,
-            $request
-        ) {
+    $cart,
+    $user,
+    $total,
+    $finalTotal,
+    $discount,
+    $voucher,
+    $request
+) {
 
             if (
                 $request->payment_method === 'balance'
             ) {
 
-                $user->decrement(
-                    'balance',
-                    $total
-                );
+               $user->decrement(
+    'balance',
+    $finalTotal
+);
 
                 $paymentStatus = 'paid';
                 $orderStatus = 'paid';
@@ -86,12 +167,19 @@ class CheckoutController extends Controller
 
             }
 
+                        $commissionAmount = Order::calculateCommission($finalTotal);
+            $sellerIncome = max(0, $finalTotal);
+
             $order = Order::create([
                 'user_id' => $user->id,
-                'total_price' => $total,
+                'voucher_id' => $voucher?->id,
+                'discount' => $discount,
+                'total_price' => $finalTotal,
                 'status' => $orderStatus,
                 'payment_method' => $request->payment_method,
                 'payment_status' => $paymentStatus,
+                'commission_amount' => $commissionAmount,
+                'seller_income' => $sellerIncome,
             ]);
 
             foreach ($cart->items as $item) {

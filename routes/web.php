@@ -25,10 +25,14 @@ use App\Http\Controllers\Admin\SellerManagementController;
 use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\VoucherController;
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
 
 use App\Http\Controllers\Seller\ProductController;
 use App\Http\Controllers\Seller\SellerOrderController;
 use App\Http\Controllers\Seller\StoreController as SellerStoreController;
+use App\Http\Controllers\Seller\WithdrawalController;
 /*
 |--------------------------------------------------------------------------
 | PUBLIC
@@ -156,6 +160,11 @@ $topStores = \App\Models\Store::with([
 ->take(5)
 ->get();
 
+$banners = \App\Models\Banner::where(
+    'is_active',
+    true
+)->latest()->get();
+
     return Inertia::render(
         'DashboardUser',
         [
@@ -163,6 +172,9 @@ $topStores = \App\Models\Store::with([
             'recentOrders' => $recentOrders,
             'bestSellingProducts' => $bestSellingProducts,
             'topStores' => $topStores,
+            'banners' => $banners,
+
+           
 
             'stats' => [
 
@@ -363,118 +375,65 @@ $topStores = \App\Models\Store::with([
 
 Route::middleware('role:seller')->group(function () {
 
-Route::get('/seller/dashboard', function () {
+    Route::get('/seller/dashboard', function () {
+        $store = auth()->user()->store;
 
-    $store = auth()->user()->store;
+        $stats = [
+            'products' => $store->products()->count(),
+            'activeProducts' => $store->products()->where('status', 'active')->count(),
+            'soldOutProducts' => $store->products()->where('status', 'sold_out')->count(),
+            'soldItems' => $store->products()->sum('sold_count'),
+            'revenue' => $store->products()->sum(\DB::raw('price * sold_count')),
+        ];
 
-    $stats = [
+        $announcement = Schema::hasTable('announcements')
+            ? \App\Models\Announcement::where('is_active', true)->latest()->first()
+            : null;
 
-        'products' => $store
+        $topProduct = $store
             ->products()
-            ->count(),
+            ->orderByDesc('sold_count')
+            ->first();
 
-        'activeProducts' => $store
+        $currentMonthRevenue = $store
             ->products()
-            ->where('status', 'active')
-            ->count(),
+            ->sum(\DB::raw('price * sold_count'));
 
-        'soldOutProducts' => $store
-            ->products()
-            ->where('status', 'sold_out')
-            ->count(),
+        $conversations = \App\Models\Conversation::with(['buyer', 'product'])
+            ->where('seller_id', auth()->id())
+            ->latest()
+            ->take(6)
+            ->get();
 
-        'soldItems' => $store
-            ->products()
-            ->sum('sold_count'),
+        $pendingOrders = \App\Models\OrderItem::whereHas('product', fn ($q) => $q->where('store_id', $store->id))
+            ->whereHas('order', fn ($q) => $q->where('status', 'pending'))
+            ->count();
 
-        'revenue' => $store
-            ->products()
-            ->sum(
-                \DB::raw(
-                    'price * sold_count'
-                )
-            ),
+        $completedOrders = \App\Models\OrderItem::whereHas('product', fn ($q) => $q->where('store_id', $store->id))
+            ->whereHas('order', fn ($q) => $q->where('status', 'completed'))
+            ->count();
 
-        
-
-    ];
-
-    $announcement = Schema::hasTable('announcements')
-        ? \App\Models\Announcement::where('is_active', true)->latest()->first()
-        : null;
-
-    $topProduct = $store
-        ->products()
-        ->orderByDesc('sold_count')
-        ->first();
-
-    $currentMonthRevenue = $store
-    ->products()
-    ->sum(
-        \DB::raw(
-            'price * sold_count'
-        )
-    );
-
-    $conversations = \App\Models\Conversation::with(['buyer', 'product'])
-        ->where('seller_id', auth()->id())
-        ->latest()
-        ->take(6)
-        ->get();
-
-$pendingOrders =
-    \App\Models\OrderItem::whereHas(
-        'product',
-        fn ($q) =>
-            $q->where(
-                'store_id',
-                $store->id
-            )
-    )
-    ->whereHas(
-        'order',
-        fn ($q) =>
-            $q->where(
-                'status',
-                'pending'
-            )
-    )
-    ->count();
-
-$completedOrders =
-    \App\Models\OrderItem::whereHas(
-        'product',
-        fn ($q) =>
-            $q->where(
-                'store_id',
-                $store->id
-            )
-    )
-    ->whereHas(
-        'order',
-        fn ($q) =>
-            $q->where(
-                'status',
-                'completed'
-            )
-    )
-    ->count();
-
-    return Inertia::render(
-        'DashboardSeller',
-        [
+        return Inertia::render('DashboardSeller', [
             'announcement' => $announcement,
             'stats' => $stats,
             'topProduct' => $topProduct,
             'pendingOrders' => $pendingOrders,
-'completedOrders' => $completedOrders,
-'currentMonthRevenue' => $currentMonthRevenue,
-'store' => $store,
+            'completedOrders' => $completedOrders,
+            'currentMonthRevenue' => $currentMonthRevenue,
+            'store' => $store,
             'conversations' => $conversations,
-        ]
-    );
+        ]);
+    })->name('seller.dashboard');
 
-})->name('seller.dashboard');
+    Route::get(
+    '/seller/withdrawals',
+    [WithdrawalController::class, 'index']
+)->name('seller.withdrawals.index');
+
+Route::post(
+    '/seller/withdrawals',
+    [WithdrawalController::class, 'store']
+)->name('seller.withdrawals.store');
 
     Route::get(
         '/seller/products',
@@ -654,8 +613,52 @@ Route::post(
 
     });
 
-});
+        Route::get(
+            '/admin/vouchers',
+            [VoucherController::class, 'index']
+        )->name('admin.vouchers.index');
 
+        Route::post(
+            '/admin/vouchers',
+            [VoucherController::class, 'store']
+        )->name('admin.vouchers.store');
+
+        Route::get(
+            '/admin/banners',
+            [BannerController::class, 'index']
+        )->name('admin.banners.index');
+
+        Route::post(
+            '/admin/banners',
+            [BannerController::class, 'store']
+        )->name('admin.banners.store');
+
+        Route::delete(
+            '/admin/banners/{banner}',
+            [BannerController::class, 'destroy']
+        )->name('admin.banners.destroy');
+
+        Route::patch(
+            '/admin/banners/{banner}/toggle',
+            [BannerController::class, 'toggle']
+        )->name('admin.banners.toggle');
+
+        Route::get(
+    '/admin/withdrawals',
+    [AdminWithdrawalController::class, 'index']
+)->name('admin.withdrawals.index');
+
+Route::post(
+    '/admin/withdrawals/{withdrawal}/approve',
+    [AdminWithdrawalController::class, 'approve']
+)->name('admin.withdrawals.approve');
+
+Route::post(
+    '/admin/withdrawals/{withdrawal}/reject',
+    [AdminWithdrawalController::class, 'reject']
+)->name('admin.withdrawals.reject');
+
+    });
 /*
 |--------------------------------------------------------------------------
 | PROFILE

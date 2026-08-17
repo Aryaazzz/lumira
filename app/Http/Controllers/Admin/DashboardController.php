@@ -10,6 +10,7 @@ use App\Models\SellerApplication;
 use App\Models\Store;
 use App\Models\TopUp;
 use App\Models\User;
+use App\Models\Withdrawal;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
@@ -37,13 +38,13 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        $salesChart = Order::selectRaw(
-    'MONTH(created_at) as month, SUM(total_price) as total'
-)
-->where('status', 'completed')
-->groupBy('month')
-->orderBy('month')
-->get();
+        $salesChart = Order::selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
+            ->where('status', 'completed')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        $totalCommission = Order::sum('commission_amount');
 
         return Inertia::render('Admin/Dashboard', [
             'stats' => $stats,
@@ -51,6 +52,7 @@ class DashboardController extends Controller
             'topProduct' => $topProduct,
             'latestOrders' => $latestOrders,
             'salesChart' => $salesChart,
+            'totalCommission' => $totalCommission,
         ]);
     }
 }
