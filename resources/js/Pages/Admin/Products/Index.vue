@@ -86,10 +86,10 @@ const statusClass = (status = false) =>
                                 <td class="py-4 pr-4">
                                     <div class="flex flex-wrap gap-2">
                                         <button v-if="!product.is_hidden" @click="hideProduct(product.id)" class="rounded-xl bg-amber-500 px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-amber-900/15 transition hover:-translate-y-0.5 hover:bg-amber-600">
-                                            <i class="fas fa-eye-slash mr-1"></i>Hide
+                                            Hide
                                         </button>
                                         <button v-else @click="showProduct(product.id)" class="rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-emerald-900/15 transition hover:-translate-y-0.5 hover:bg-emerald-700">
-                                            <i class="fas fa-eye mr-1"></i>Show
+                                            Show
                                         </button>
                                         <button @click="deleteProduct(product.id)" class="rounded-xl bg-red-600 px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:bg-red-700">
                                             <i class="fas fa-trash mr-1"></i>Hapus

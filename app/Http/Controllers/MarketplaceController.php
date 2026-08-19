@@ -108,8 +108,7 @@ public function index(Request $request)
     $product->load([
     'images',
     'category',
-    'store',
-    'reviews.user',
+    'store.reviews.user',
 ]);
     $isWishlisted = false;
 

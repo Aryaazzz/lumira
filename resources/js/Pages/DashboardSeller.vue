@@ -99,16 +99,25 @@ const formatCurrency = (value) => {
                         <p class="mt-2 text-sm leading-6 text-slate-500">Lihat produk terbaru di platform dan cari peluang lebih besar.</p>
                     </Link>
 
-                    <Link :href="route('notifications.index')" class="group rounded-[1.6rem] bg-gradient-to-br from-[#fefce8] to-[#fff6d4] p-6 text-slate-800 ring-1 ring-yellow-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/10" data-aos="fade-up" data-aos-delay="200">
+                    <Link :href="route('chat.index')" class="group rounded-[1.6rem] bg-gradient-to-br from-[#fefce8] to-[#fff6d4] p-6 text-slate-800 ring-1 ring-yellow-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/10" data-aos="fade-up" data-aos-delay="200">
                         <div class="flex items-center justify-between">
-                            <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-xl text-slate-500"><i class="fas fa-bell"></i></span>
-                            <span class="rounded-full bg-white px-2 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Alerts</span>
+                            <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-xl text-[#0c7c43]"><i class="fas fa-comments"></i></span>
+                            <span class="rounded-full bg-white px-2 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#0c7c43]">Inbox</span>
                         </div>
-                        <h3 class="mt-8 text-xl font-black">Notifikasi</h3>
-                        <p class="mt-2 text-sm leading-6 text-slate-500">Cek aktivitas terbaru penjualan dan pembeli Anda.</p>
+                        <h3 class="mt-8 text-xl font-black">Pesan Masuk</h3>
+                        <p class="mt-2 text-sm leading-6 text-slate-500">Lihat chat dari pembeli dan balas pesan mereka langsung.</p>
                     </Link>
 
-                    <Link :href="route('profile.edit')" class="group rounded-[1.6rem] bg-gradient-to-br from-[#0b2617] to-[#163d2a] p-6 text-white shadow-lg shadow-green-900/20 transition duration-300 hover:-translate-y-1 hover:shadow-2xl" data-aos="fade-up" data-aos-delay="250">
+                    <Link :href="route('seller.withdrawals.index')" class="group rounded-[1.6rem] bg-gradient-to-br from-[#ecfdf5] to-[#dcfce7] p-6 text-slate-800 ring-1 ring-emerald-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/10" data-aos="fade-up" data-aos-delay="250">
+                        <div class="flex items-center justify-between">
+                            <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-xl text-[#0c7c43]"><i class="fas fa-money-bill-wave"></i></span>
+                            <span class="rounded-full bg-white px-2 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#0c7c43]">Withdraw</span>
+                        </div>
+                        <h3 class="mt-8 text-xl font-black">Tarik Dana</h3>
+                        <p class="mt-2 text-sm leading-6 text-slate-500">Ajukan penarikan saldo dan cek riwayat withdraw Anda.</p>
+                    </Link>
+
+                    <Link :href="route('profile.edit')" class="group rounded-[1.6rem] bg-gradient-to-br from-[#0b2617] to-[#163d2a] p-6 text-white shadow-lg shadow-green-900/20 transition duration-300 hover:-translate-y-1 hover:shadow-2xl" data-aos="fade-up" data-aos-delay="300">
                         <div class="flex items-center justify-between">
                             <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-xl"><i class="fas fa-user-circle"></i></span>
                             <span class="rounded-full bg-white/10 px-2 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-green-100">Profile</span>

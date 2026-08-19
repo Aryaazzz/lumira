@@ -17,7 +17,9 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('topup.store'));
+    form.post(route('topup.store'), {
+        forceFormData: true,
+    });
 };
 </script>
 

@@ -15,7 +15,9 @@ const form = useForm({
 })
 
 const submit = () => {
-    form.post(route('seller.apply.store'))
+    form.post(route('seller.apply.store'), {
+        forceFormData: true,
+    })
 }
 </script>
 

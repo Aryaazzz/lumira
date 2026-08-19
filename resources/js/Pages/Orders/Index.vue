@@ -1,7 +1,7 @@
 
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { Head, useForm } from '@inertiajs/vue3'
+import { Head, useForm, router } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
 const props = defineProps({
@@ -28,6 +28,10 @@ function submitReview(orderId)
             }
         }
     )
+}
+
+const startChat = (orderId) => {
+    router.post(route('chat.start-order', orderId))
 }
 </script>
 
@@ -223,9 +227,35 @@ function submitReview(orderId)
                         <p class="text-sm text-slate-700 leading-6">{{ order.review.comment }}</p>
                     </div>
 
+                    <!-- Action Buttons -->
+                    <div class="border-t border-slate-100 bg-slate-50 p-5 flex flex-wrap gap-3 items-center justify-between">
+                        <div class="flex-1">
+                            <p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">Tanggal Pembelian</p>
+                            <p class="font-black text-slate-800">{{ new Date(order.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) }}</p>
+                        </div>
+                        
+                        <div class="flex gap-2 flex-wrap justify-end">
+                            <button
+                                @click="startChat(order.id)"
+                                class="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold bg-gradient-to-r from-[#0c7c43] to-[#0a5f36] text-white shadow-md hover:-translate-y-1 hover:shadow-lg transition"
+                            >
+                                <i class="fas fa-comment-dots"></i>
+                                Chat Penjual
+                            </button>
+                            
+                            <a
+                                :href="route('marketplace.show', order.items[0]?.product_id)"
+                                class="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold border-2 border-slate-300 text-slate-700 hover:border-[#0c7c43] hover:text-[#0c7c43] hover:bg-[#f0fdf4] transition"
+                            >
+                                Lihat Produk
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
 
     </AuthenticatedLayout>
 </template>
+

@@ -24,10 +24,13 @@ use App\Http\Controllers\Admin\SellerManagementController;
 use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
 
 use App\Http\Controllers\Seller\ProductController;
 use App\Http\Controllers\Seller\SellerOrderController;
 use App\Http\Controllers\Seller\StoreController as SellerStoreController;
+use App\Http\Controllers\Seller\WithdrawalController as SellerWithdrawalController;
 /*
 |--------------------------------------------------------------------------
 | PUBLIC
@@ -40,8 +43,9 @@ Route::get('/', function () {
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'banners' => \App\Models\Banner::where('is_active', true)->latest()->get(),
     ]);
-});
+})->name('welcome');
 
 Route::get(
     '/marketplace',
@@ -84,7 +88,7 @@ Route::post(
         }
 
         if ($user->seller_status === 'suspended') {
-            return redirect()->route('user.dashboard')->with(
+            return redirect()->route('welcome')->with(
                 'error',
                 'Hak seller Anda sedang dicabut oleh admin.'
             );
@@ -93,8 +97,7 @@ Route::post(
         return redirect()->route(match ($user->role) {
             'admin' => 'admin.dashboard',
             'seller' => 'seller.dashboard',
-            'user' => 'user.dashboard',
-            default => 'user.dashboard',
+            default => 'welcome',
         });
     })->name('dashboard');
 
@@ -120,64 +123,7 @@ Route::delete(
     */
 
    Route::get('/user/dashboard', function () {
-    $user = auth()->user();
-
-    if (! $user) {
-        return redirect()->route('login');
-    }
-
-    $announcement = \App\Models\Announcement::where(
-        'is_active',
-        true
-    )->latest()->first();
-
-    $recentOrders = \App\Models\Order::with([
-        'orderItems.product',
-    ])
-        ->where('user_id', $user->id)
-        ->latest()
-        ->take(5)
-        ->get();
-
-    $bestSellingProducts = \App\Models\Product::with([
-        'store',
-        'category',
-    ])
-        ->where('status', 'active')
-        ->orderByDesc('sold_count')
-        ->take(4)
-        ->get();
-
-    $topStores = \App\Models\Store::with([
-        'user',
-    ])
-        ->withCount('reviews')
-        ->orderByDesc('rating')
-        ->take(5)
-        ->get();
-
-    return Inertia::render('DashboardUser', [
-        'announcement' => $announcement,
-        'recentOrders' => $recentOrders,
-        'bestSellingProducts' => $bestSellingProducts,
-        'topStores' => $topStores,
-        'stats' => [
-            'balance' => $user->balance,
-            'orders' => \App\Models\Order::where('user_id', $user->id)->count(),
-            'shippedOrders' => \App\Models\Order::where('user_id', $user->id)
-                ->where('status', 'shipped')
-                ->count(),
-            'wishlistCount' => \App\Models\Wishlist::where('user_id', $user->id)->count(),
-        ],
-        'latestProducts' => \App\Models\Product::with([
-            'category',
-            'store',
-        ])
-            ->where('status', 'active')
-            ->latest()
-            ->take(4)
-            ->get(),
-    ]);
+    return redirect()->route('welcome');
 })->name('user.dashboard');
 
     /*
@@ -465,6 +411,16 @@ Route::put(
         [SellerOrderController::class, 'index']
     )->name('seller.orders.index');
 
+    Route::get(
+        '/seller/withdrawals',
+        [SellerWithdrawalController::class, 'index']
+    )->name('seller.withdrawals.index');
+
+    Route::post(
+        '/seller/withdrawals',
+        [SellerWithdrawalController::class, 'store']
+    )->name('seller.withdrawals.store');
+
     Route::post(
         '/seller/orders/{orderItem}/ship',
         [SellerOrderController::class, 'ship']
@@ -500,6 +456,11 @@ Route::post(
 )->name('admin.dashboard');
 
         Route::get(
+            '/admin/statistics',
+            [DashboardController::class, 'statistics']
+        )->name('admin.statistics');
+
+        Route::get(
             '/admin/seller-applications',
             [AdminSellerApplicationController::class, 'index']
         )->name('admin.seller.applications');
@@ -528,6 +489,11 @@ Route::post(
             '/admin/topups/{topUp}/reject',
             [AdminTopUpController::class, 'reject']
         )->name('admin.topups.reject');
+
+        Route::delete(
+            '/admin/topups/{topUp}',
+            [AdminTopUpController::class, 'destroy']
+        )->name('admin.topups.destroy');
 
         Route::get(
     '/admin/sellers',
@@ -600,6 +566,41 @@ Route::post(
     ,
     [AdminProductController::class, 'show']
 )->name('admin.products.show');
+
+        Route::get(
+            '/admin/banners',
+            [BannerController::class, 'index']
+        )->name('admin.banners.index');
+
+        Route::post(
+            '/admin/banners',
+            [BannerController::class, 'store']
+        )->name('admin.banners.store');
+
+        Route::delete(
+            '/admin/banners/{banner}',
+            [BannerController::class, 'destroy']
+        )->name('admin.banners.destroy');
+
+        Route::patch(
+            '/admin/banners/{banner}/toggle',
+            [BannerController::class, 'toggle']
+        )->name('admin.banners.toggle');
+
+        Route::get(
+            '/admin/withdrawals',
+            [AdminWithdrawalController::class, 'index']
+        )->name('admin.withdrawals.index');
+
+        Route::post(
+            '/admin/withdrawals/{withdrawal}/approve',
+            [AdminWithdrawalController::class, 'approve']
+        )->name('admin.withdrawals.approve');
+
+        Route::post(
+            '/admin/withdrawals/{withdrawal}/reject',
+            [AdminWithdrawalController::class, 'reject']
+        )->name('admin.withdrawals.reject');
 
     });
 

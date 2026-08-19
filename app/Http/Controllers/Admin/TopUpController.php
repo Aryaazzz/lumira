@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\TopUp;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-use App\Models\Notification;
 
 class TopUpController extends Controller
 {
@@ -60,22 +61,38 @@ class TopUpController extends Controller
             return back();
         }
 
-        $topUp->update([
-            'status' => 'rejected',
-            'approved_by' => auth()->id(),
-            'approved_at' => now(),
-        ]);
+        DB::transaction(function () use ($topUp) {
+            $topUp->update([
+                'status' => 'rejected',
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+            ]);
+
+            Notification::create([
+                'user_id' => $topUp->user_id,
+                'title' => 'Top Up Ditolak',
+                'message' => 'Silakan upload ulang bukti transfer.',
+                'type' => 'topup',
+            ]);
+        });
 
         return back()->with(
             'success',
             'Top Up ditolak'
         );
+    }
 
-        Notification::create([
-    'user_id' => $topUp->user_id,
-    'title' => 'Top Up Ditolak',
-    'message' => 'Silakan upload ulang bukti transfer.',
-    'type' => 'topup',
-]);
+    public function destroy(TopUp $topUp)
+    {
+        if ($topUp->proof) {
+            Storage::disk('public')->delete($topUp->proof);
+        }
+
+        $topUp->delete();
+
+        return back()->with(
+            'success',
+            'Riwayat top up berhasil dihapus'
+        );
     }
 }

@@ -30,8 +30,20 @@ const showingNavigationDropdown = ref(false);
                         </div>
                     </div>
 
-                    <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                        <div class="relative ms-3">
+                    <div class="hidden sm:ms-6 sm:flex sm:items-center sm:gap-3">
+                        <Link v-if="$page.props.auth.user.role !== 'admin'" :href="route('chat.index')" class="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-green-100 bg-[#f4faf5] text-lg text-slate-600 transition hover:border-[#0c7c43]/40 hover:bg-[#edf9ee] hover:text-[#0c7c43]" title="Pesan Masuk">
+                            <i class="fas fa-comments"></i>
+                            <span class="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#0c7c43] ring-2 ring-white"></span>
+                        </Link>
+
+                        <Link :href="route('notifications.index')" class="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-green-100 bg-[#f4faf5] text-lg text-slate-600 transition hover:border-[#0c7c43]/40 hover:bg-[#edf9ee] hover:text-[#0c7c43]" title="Notifikasi">
+                            <i class="fas fa-bell"></i>
+                            <span v-if="$page.props.notificationsCount > 0" class="absolute -right-1 -top-1 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                                {{ $page.props.notificationsCount > 9 ? '9+' : $page.props.notificationsCount }}
+                            </span>
+                        </Link>
+
+                        <div class="relative ms-1">
                             <Dropdown align="right" width="48">
                                 <template #trigger>
                                     <span class="inline-flex rounded-full">
@@ -75,6 +87,15 @@ const showingNavigationDropdown = ref(false);
 
             <div :class="{ block: showingNavigationDropdown, hidden: !showingNavigationDropdown }" class="sm:hidden">
                 <div class="space-y-1 border-t border-green-100 bg-white pb-3 pt-2">
+                    <ResponsiveNavLink :href="route('notifications.index')" class="flex items-center gap-3 text-slate-700">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#edf9ee] text-[#0c7c43]">
+                            <i class="fas fa-bell text-sm"></i>
+                        </span>
+                        <span>Notifikasi</span>
+                        <span v-if="$page.props.notificationsCount > 0" class="ml-auto inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                            {{ $page.props.notificationsCount > 9 ? '9+' : $page.props.notificationsCount }}
+                        </span>
+                    </ResponsiveNavLink>
                 </div>
 
                 <div class="border-t border-green-100 pb-1 pt-4">

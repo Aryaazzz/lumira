@@ -10,6 +10,7 @@ use App\Models\SellerApplication;
 use App\Models\Store;
 use App\Models\TopUp;
 use App\Models\User;
+use App\Models\Withdrawal;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,24 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     public function index()
+    {
+        $stats = [
+            'users' => User::count(),
+            'sellers' => User::where('role', 'seller')->count(),
+            'products' => Product::count(),
+            'orders' => Order::count(),
+            'revenue' => OrderItem::sum(\DB::raw('price * quantity')),
+            'pendingTopups' => Schema::hasTable('top_ups') ? TopUp::where('status', 'pending')->count() : 0,
+            'pendingSellerApplications' => Schema::hasTable('seller_applications') ? SellerApplication::where('seller_status', 'pending')->count() : 0,
+            'soldOutProducts' => Product::where('status', 'sold_out')->count(),
+        ];
+
+        return Inertia::render('Admin/Dashboard', [
+            'stats' => $stats,
+        ]);
+    }
+
+    public function statistics()
     {
         $stats = [
             'users' => User::count(),
@@ -37,20 +56,21 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        $salesChart = Order::selectRaw(
-    'MONTH(created_at) as month, SUM(total_price) as total'
-)
-->where('status', 'completed')
-->groupBy('month')
-->orderBy('month')
-->get();
+        $salesChart = Order::selectRaw('MONTH(created_at) as month, SUM(total_price) as total')
+            ->where('status', 'completed')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
 
-        return Inertia::render('Admin/Dashboard', [
+        $totalCommission = Order::sum('commission_amount');
+
+        return Inertia::render('Admin/Statistics', [
             'stats' => $stats,
             'topSeller' => $topSeller,
             'topProduct' => $topProduct,
             'latestOrders' => $latestOrders,
             'salesChart' => $salesChart,
+            'totalCommission' => $totalCommission,
         ]);
     }
 }

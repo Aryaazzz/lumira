@@ -4,7 +4,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import AOS from 'aos'
 import AppFooter from '@/Components/AppFooter.vue'
 
-defineProps({
+const props = defineProps({
     canLogin: {
         type: Boolean,
         default: false,
@@ -13,15 +13,37 @@ defineProps({
         type: Boolean,
         default: false,
     },
+    banners: {
+        type: Array,
+        default: () => [],
+    },
 })
+
+const activeBanners = computed(() => props.banners ?? [])
+const featuredBanner = computed(() => activeBanners.value[0] ?? null)
+const secondaryBanners = computed(() => activeBanners.value.slice(1, 3))
 
 const page = usePage()
 
 const isLoggedIn = computed(() => !!page.props?.auth?.user)
+const loggedUser = computed(() => page.props?.auth?.user ?? null)
+const userDashboardStats = computed(() => ({
+    balance: Number(page.props?.stats?.balance ?? loggedUser.value?.balance ?? 0),
+    orders: Number(page.props?.stats?.orders ?? 0),
+    shipped: Number(page.props?.stats?.shippedOrders ?? 0),
+    wishlist: Number(page.props?.stats?.wishlistCount ?? 0),
+}))
 const scrolled = ref(false)
 const heroSceneEl = ref(null)
 const heroRotate = ref(0)
 const productRotate = ref({})
+
+const formatCurrency = (value) =>
+    new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0,
+    }).format(Number(value || 0))
 
 const img = {
     hero: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=1200&auto=format&fit=crop',
@@ -131,7 +153,7 @@ onUnmounted(() => {
                     <div class="hidden sm:block">
                         <h1 class="text-xl font-black leading-none tracking-tight text-[#0b2617]">LUMIRA</h1>
                         <p class="mt-1 text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400">
-                            Layanan Ulang Material Ramah
+                            Layanan Ulang Material 
                         </p>
                     </div>
                 </Link>
@@ -141,20 +163,33 @@ onUnmounted(() => {
                 <div class="flex shrink-0 items-center gap-2">
                     <template v-if="canLogin">
                         <template v-if="isLoggedIn">
-                            <Link :href="route('topup.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-500 shadow-sm transition hover:border-green-200 hover:text-[#0c7c43]" title="Top Up">
+                            <div class="hidden items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm sm:flex">
+                                <i class="fas fa-wallet text-[11px] text-slate-500"></i>
+                                <span>{{ formatCurrency(userDashboardStats.balance) }}</span>
+                            </div>
+                            <Link :href="route('topup.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900" title="Top Up">
                                 <i class="fas fa-wallet"></i>
                             </Link>
-                            <Link :href="route('cart.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-500 shadow-sm transition hover:border-green-200 hover:text-[#0c7c43]" title="Keranjang">
+                            <Link :href="route('cart.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900" title="Keranjang">
                                 <i class="fas fa-shopping-cart"></i>
                             </Link>
-                            <Link :href="route('orders.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-500 shadow-sm transition hover:border-green-200 hover:text-[#0c7c43]" title="Pesanan Saya">
+                            <Link :href="route('wishlist.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-pink-600" title="Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </Link>
+                            <Link :href="route('orders.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900" title="Pesanan Saya">
                                 <i class="fas fa-box"></i>
                             </Link>
-                            <Link :href="route('notifications.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-500 shadow-sm transition hover:border-green-200 hover:text-[#0c7c43]" title="Notifikasi">
+                            <Link v-if="loggedUser?.seller_status !== 'suspended' && loggedUser?.role === 'seller'" :href="route('seller.withdrawals.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-emerald-600" title="Tarik Dana">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </Link>
+                            <Link :href="route('chat.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900" title="Pesan Masuk">
+                                <i class="fas fa-comments"></i>
+                            </Link>
+                            <Link :href="route('notifications.index')" class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900" title="Notifikasi">
                                 <i class="fas fa-bell"></i>
                             </Link>
-                            <Link :href="route('profile.edit')" class="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1.5 pr-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-green-200 hover:text-[#0c7c43]" title="Profil pengguna">
-                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#edf9ee] text-base text-[#0c7c43]">
+                            <Link :href="route('profile.edit')" class="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1.5 pr-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900" title="Profil pengguna">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-base text-slate-700">
                                     <i class="fas fa-user"></i>
                                 </span>
                                 <span class="max-w-[90px] truncate">{{ page.props.auth.user.name }}</span>
@@ -163,7 +198,7 @@ onUnmounted(() => {
                                 :href="route('logout')"
                                 method="post"
                                 as="button"
-                                class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-500 shadow-sm transition hover:border-red-200 hover:text-red-500"
+                                class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
                                 title="Keluar"
                             >
                                 <i class="fas fa-power-off"></i>
@@ -183,6 +218,59 @@ onUnmounted(() => {
             </div>
         </header>
 
+
+        <section class="mx-auto max-w-7xl px-6 pt-6 lg:px-8" data-aos="fade-up">
+            <div v-if="featuredBanner" class="group relative overflow-hidden rounded-2xl shadow-2xl shadow-green-900/20 transition-all duration-500 hover:shadow-green-900/30">
+                <!-- Background with image and overlay -->
+                <div class="absolute inset-0 -z-10">
+                    <img
+                        v-if="featuredBanner.image"
+                        :src="`/storage/${featuredBanner.image}`"
+                        :alt="featuredBanner.title"
+                        class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                    />
+                    <!-- Dark overlay -->
+                    <div class="absolute inset-0 bg-black/40"></div>
+                    <!-- Gradient overlay left to right -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"></div>
+                </div>
+
+                <div class="relative flex flex-col justify-center gap-4 px-6 py-16 sm:py-20 lg:px-8">
+                    <!-- Label -->
+                    <div class="flex items-center gap-2">
+                        <div class="h-1 w-6 rounded-full bg-green-300"></div>
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-green-200">Promo Spesial</p>
+                    </div>
+
+                    <!-- Main title with highlighted text -->
+                    <div class="max-w-2xl">
+                        <h3 class="text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
+                            {{ featuredBanner.title }}
+                            <span v-if="featuredBanner.title.includes('%')" class="text-green-300">{{ featuredBanner.title.split(' ').pop() }}</span>
+                        </h3>
+                    </div>
+
+                    <!-- Subtitle -->
+                    <p class="max-w-md text-base font-semibold text-gray-200 sm:text-lg">
+                        {{ featuredBanner.description || 'Jangan lewatkan penawaran istimewa dari Lumira.' }}
+                    </p>
+
+                    <!-- CTA Button -->
+                    <div class="mt-4 flex items-center gap-4">
+                        <a
+                            v-if="featuredBanner.button_link"
+                            :href="featuredBanner.button_link"
+                            class="inline-flex items-center gap-2 rounded-lg bg-[#2cb342] px-6 py-2.5 font-bold text-white transition duration-300 hover:bg-[#25a03d] hover:-translate-y-0.5"
+                        >
+                            {{ featuredBanner.button_text || 'Lihat Promo' }}
+                            <span class="transition group-hover:translate-x-1">→</span>
+                        </a>
+                        <div class="h-10 w-px bg-white/20"></div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-gray-300">Terbatas</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- ================================================= -->
         <!-- HERO -->
@@ -280,12 +368,14 @@ onUnmounted(() => {
                         <div
                             ref="heroSceneEl"
                             class="absolute inset-0 h-full w-full cursor-grab touch-none active:cursor-grabbing"
+                            data-aos="zoom-in"
+                            data-aos-duration="1200"
                             aria-label="Inspect product photo"
                         >
                             <img
                                 :src="img.hero"
                                 alt="Produk material daur ulang"
-                                class="h-full w-full object-cover transition duration-200 ease-out"
+                                class="media-reveal h-full w-full object-cover transition duration-200 ease-out"
                                 :style="{ transform: `perspective(1200px) rotateY(${heroRotate}deg) scale(1.06)` }"
                             />
                         </div>
@@ -394,42 +484,47 @@ onUnmounted(() => {
         <!-- CATEGORY -->
         <!-- ================================================= -->
 
-        <section class="bg-[#f0f5f0] py-24">
+        <section class="bg-gradient-to-b from-[#edf7ee] via-[#f3faf4] to-[#edf6ef] py-24">
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
 
-                <div class="flex flex-wrap items-end justify-between gap-4" data-aos="fade-up">
+                <div class="mb-12 flex flex-wrap items-end justify-between gap-4" data-aos="fade-up">
                     <div>
-                        <p class="text-sm font-black uppercase tracking-[0.2em] text-[#0c7c43]">Jelajahi</p>
-                        <h2 class="mt-3 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
+                        <p class="text-[11px] font-black uppercase tracking-[0.28em] text-[#0c7c43]">Jelajahi</p>
+                        <h2 class="mt-3 text-4xl font-black leading-[0.92] tracking-[-0.08em] text-slate-950 sm:text-5xl xl:text-[4.5rem]">
                             Material yang punya <span class="text-[#0c7c43]">cerita.</span>
                         </h2>
                     </div>
                 </div>
 
-                <div class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
                     <div
                         v-for="(cat, i) in categories"
                         :key="cat.title"
-                        data-aos="fade-up"
-                        :data-aos-delay="i * 100"
-                        class="tilt-card group relative overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-slate-100 transition-shadow duration-500 hover:shadow-2xl hover:shadow-green-900/10"
+                        data-aos="zoom-in-up"
+                        :data-aos-delay="i * 120"
+                        :style="{ '--card-delay': `${i * 120}ms` }"
+                        class="category-card reveal-card group relative overflow-hidden rounded-[2.1rem] border border-[#dfeee4] bg-white shadow-[0_22px_55px_rgba(15,23,42,0.06)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(12,124,67,0.15)]"
                         @mousemove="handleTilt"
                         @mouseenter="liftTilt"
                         @mouseleave="resetTilt"
                     >
-                        <div class="relative h-44 overflow-hidden">
-                            <img :src="cat.image" :alt="cat.title" class="h-full w-full object-cover transition duration-700 group-hover:scale-110" />
-                            <span class="absolute right-4 top-4 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-black text-[#0c7c43] shadow">
+                        <div class="relative h-60 overflow-hidden rounded-[1.65rem] m-3 mb-0">
+                            <img :src="cat.image" :alt="cat.title" class="media-reveal h-full w-full object-cover transition duration-700 group-hover:scale-110" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0b2617]/15 via-transparent to-transparent"></div>
+                            <span class="absolute right-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[11px] font-black text-[#0c7c43] shadow-sm shadow-slate-900/5 backdrop-blur-sm">
                                 {{ cat.count }}
                             </span>
                         </div>
-                        <div class="p-6">
-                            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-400 transition duration-300 group-hover:bg-[#0c7c43] group-hover:text-white group-hover:rotate-6">
-                                <i :class="['fas', cat.icon, 'text-base']"></i>
+
+                        <div class="px-5 pb-6 pt-5">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#edf9ee] text-[#0c7c43] shadow-inner shadow-green-900/5 transition duration-300 group-hover:-rotate-6 group-hover:bg-[#0c7c43] group-hover:text-white">
+                                <i :class="['fas', cat.icon, 'text-lg']"></i>
                             </div>
-                            <h3 class="mt-5 text-xl font-black">{{ cat.title }}</h3>
-                            <p class="mt-2 text-sm leading-6 text-slate-500">{{ cat.desc }}</p>
-                            <div class="mt-4 flex items-center gap-1 text-sm font-bold text-[#0c7c43] opacity-0 transition duration-300 group-hover:opacity-100">
+
+                            <h3 class="mt-5 text-[2.15rem] font-black leading-none tracking-[-0.07em] text-slate-900">{{ cat.title }}</h3>
+                            <p class="mt-3 text-sm leading-7 text-slate-500">{{ cat.desc }}</p>
+
+                            <div class="mt-5 inline-flex items-center gap-2 rounded-full border border-[#dfeee3] bg-[#edf9ee] px-3 py-1.5 text-sm font-bold text-[#0c7c43] transition duration-300 group-hover:bg-[#0c7c43] group-hover:text-white">
                                 Lihat semua
                                 <span class="transition group-hover:translate-x-1">→</span>
                             </div>
@@ -511,20 +606,20 @@ onUnmounted(() => {
                         @mouseenter="liftTilt"
                         @mouseleave="resetTilt"
                     >
-                        <div class="relative h-64 overflow-hidden">
+                        <div class="relative h-64 overflow-hidden" data-aos="zoom-in" :data-aos-delay="i * 120">
                             <img
                                 :src="p.image"
                                 :alt="p.title"
-                                class="h-full w-full cursor-grab object-cover transition duration-700 group-hover:scale-110"
+                                class="media-reveal h-full w-full cursor-grab object-cover transition duration-700 group-hover:scale-110"
                                 :style="{ transform: `perspective(1200px) rotateY(${productRotate[p.title] || 0}deg) scale(1.06)` }"
                                 @pointermove="handleProductInspect($event, p.title)"
                                 @pointerleave="resetProductInspect(p.title)"
                             />
 
-                            <span class="absolute left-5 top-5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-black text-[#0c7c43] shadow">
+                            <span class="absolute left-5 top-5 rounded-full border border-white/80 bg-white/90 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-[#0c7c43] shadow-lg shadow-black/10 backdrop-blur-sm">
                                 INSPECT
                             </span>
-                            <span class="absolute bottom-4 right-4 rounded-full border border-white/60 bg-black/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white backdrop-blur-sm">
+                            <span class="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-black/20 text-[12px] font-bold text-white backdrop-blur-sm">
                                 360°
                             </span>
                         </div>
@@ -562,7 +657,7 @@ onUnmounted(() => {
                             <img
                                 :src="img.environment"
                                 alt="Lingkungan bersih"
-                                class="h-[450px] w-full object-cover transition duration-1000 hover:scale-105"
+                                class="media-reveal h-[450px] w-full object-cover transition duration-1000 hover:scale-105"
                             />
                         </div>
                     </div>
@@ -634,10 +729,10 @@ onUnmounted(() => {
                     </Link>
                     <Link
                         v-else-if="isLoggedIn"
-                        :href="route('dashboard')"
+                        :href="route('marketplace')"
                         class="btn-shine inline-flex items-center gap-3 rounded-2xl bg-white px-8 py-4 font-black text-[#0c7c43] shadow-2xl transition hover:-translate-y-1"
                     >
-                        Buka Dashboard <span>→</span>
+                        Jelajahi Marketplace <span>→</span>
                     </Link>
                 </div>
             </div>
@@ -714,6 +809,11 @@ onUnmounted(() => {
     animation: heroFloat 6s ease-in-out infinite;
 }
 
+.media-reveal {
+    animation: photoReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform-origin: center;
+}
+
 /* 3D tilt for category & product cards, driven by --rx/--ry/--tz set in JS */
 .tilt-card {
     --rx: 0deg;
@@ -723,6 +823,28 @@ onUnmounted(() => {
     transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateZ(var(--tz)) translateY(calc(var(--tz) * -0.4));
     transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
     will-change: transform;
+}
+
+.category-card {
+    backdrop-filter: blur(4px);
+    transform: translateY(0);
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.36), rgba(255,255,255,0));
+    pointer-events: none;
+}
+
+.category-card:hover {
+    transform: translateY(-4px);
+}
+
+.reveal-card {
+    animation: cardReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--card-delay, 0ms);
 }
 
 .hero-floating {
@@ -743,9 +865,33 @@ onUnmounted(() => {
     50% { transform: translateY(-12px) rotate(0.5deg); }
 }
 
+@keyframes photoReveal {
+    0% {
+        opacity: 0;
+        transform: scale(1.08) translateY(18px);
+        filter: blur(6px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
+}
+
 @keyframes floatingCard {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-12px); }
+}
+
+@keyframes cardReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(28px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 @keyframes progress {

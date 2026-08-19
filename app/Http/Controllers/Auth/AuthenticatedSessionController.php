@@ -45,7 +45,16 @@ class AuthenticatedSessionController extends Controller
             );
         }
 
-        // Redirect ke home/welcome page untuk semua user
+        // Redirect ke dashboard sesuai dengan role user
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($user->role === 'seller') {
+            return redirect()->route('seller.dashboard');
+        }
+
+        // Regular user ke welcome page
         return redirect('/');
     }
 

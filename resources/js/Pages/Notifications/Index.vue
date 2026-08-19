@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { Head, router } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
 const props = defineProps({
@@ -73,19 +73,20 @@ function readAll()
 
                 <!-- Notifications List -->
                 <div v-else class="space-y-3">
-                    <div
+                    <Link
                         v-for="(notification, idx) in sortedNotifications"
                         :key="notification.id"
+                        :href="notification.type === 'chat' ? route('chat.index') : route('notifications.index')"
                         data-aos="fade-up"
                         :data-aos-delay="idx * 30"
-                        class="group rounded-[1.5rem] bg-white shadow-sm ring-1 ring-slate-100 transition duration-300 hover:shadow-lg hover:shadow-green-900/10 overflow-hidden"
+                        class="group block rounded-[1.5rem] bg-white shadow-sm ring-1 ring-slate-100 transition duration-300 hover:shadow-lg hover:shadow-green-900/10 overflow-hidden"
                         :class="!notification.is_read ? 'border-l-4 border-[#0c7c43] bg-gradient-to-r from-[#edf9ee] via-white to-white' : ''"
                     >
                         <div class="p-5">
                             <div class="flex gap-4">
                                 <!-- Icon -->
                                 <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full" :class="!notification.is_read ? 'bg-[#0c7c43]/10' : 'bg-slate-100'">
-                                    <i class="fas fa-bell" :class="!notification.is_read ? 'text-[#0c7c43]' : 'text-slate-400'"></i>
+                                    <i :class="[notification.type === 'chat' ? 'fas fa-comments' : 'fas fa-bell', !notification.is_read ? 'text-[#0c7c43]' : 'text-slate-400']"></i>
                                 </div>
 
                                 <!-- Content -->
@@ -107,7 +108,7 @@ function readAll()
 
                                                 <button
                                                     v-if="!notification.is_read"
-                                                    @click="read(notification.id)"
+                                                    @click.prevent="read(notification.id)"
                                                     class="text-xs font-bold text-[#0c7c43] transition hover:text-[#0b2617]"
                                                 >
                                                     <i class="fas fa-check-circle mr-1"></i>
@@ -125,7 +126,7 @@ function readAll()
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </Link>
                 </div>
 
             </div>

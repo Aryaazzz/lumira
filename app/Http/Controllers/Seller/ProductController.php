@@ -34,15 +34,12 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-
         if (auth()->user()->isSuspended()) {
-
-    return back()->with(
-        'error',
-        'Akun seller Anda sedang ditangguhkan oleh admin.'
-    );
-
-}
+            return back()->with(
+                'error',
+                'Akun seller Anda sedang ditangguhkan oleh admin.'
+            );
+        }
 
         $request->validate([
             'name' => ['required'],
@@ -51,157 +48,132 @@ class ProductController extends Controller
             'price' => ['required', 'numeric'],
             'stock' => ['required', 'integer'],
             'image' => ['required', 'image', 'max:2048'],
-
-'images' => ['nullable', 'array'],
-
-'images.*' => [
-    'image',
-    'max:2048'
-],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['image', 'max:2048'],
         ]);
 
-        $image = $request->file('image')->store(
-            'products',
-            'public'
-        );
+        $image = $request->file('image')->store('products', 'public');
 
-       $product = Product::create([
-    'store_id' => auth()->user()->store->id,
-    'category_id' => $request->category_id,
-    'name' => $request->name,
-    'slug' => Str::slug($request->name) . '-' . time(),
-    'description' => $request->description,
-    'price' => $request->price,
-    'stock' => $request->stock,
-    'image' => $image,
-    'status' => 'active',
-]);
-
-if ($request->hasFile('images')) {
-
-    foreach (
-        $request->file('images')
-        as $file
-    ) {
-
-        $path = $file->store(
-            'products/gallery',
-            'public'
-        );
-
-        ProductImage::create([
-            'product_id' => $product->id,
-            'image' => $path,
+        $product = Product::create([
+            'store_id' => auth()->user()->store->id,
+            'category_id' => $request->category_id,
+            'name' => $request->name,
+            'slug' => Str::slug($request->name) . '-' . time(),
+            'description' => $request->description,
+            'price' => $request->price,
+            'stock' => $request->stock,
+            'image' => $image,
+            'status' => 'active',
         ]);
-    }
-}
 
-        return redirect()
-            ->route('seller.products.index')
-            ->with('success', 'Produk berhasil ditambahkan');
-    }
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $path = $file->store('products/gallery', 'public');
 
-   public function edit(Product $product)
-{
-
-    $product->load('images');
-    return Inertia::render(
-        'Seller/Products/Edit',
-        [
-            'product' => $product,
-            'categories' => Category::all(),
-        ]
-    );
-}
-
-public function show(Product $product)
-{
-    $product->load([
-    'images',
-    'category',
-    'store',
-    'orderItems.order.user',
-]);
-
-    // Collect unique buyers who purchased this product
-    $buyers = $product->orderItems
-        ->map(fn($item) => $item->order->user)
-        ->unique('id')
-        ->values();
-
-    return Inertia::render('Seller/Products/Show', [
-        'product' => $product,
-        'buyers' => $buyers,
-    ]);
-}
-
-public function update(
-    Request $request,
-    Product $product
-) {
-
-    $request->validate([
-        'name' => ['required'],
-        'category_id' => ['required'],
-        'description' => ['required'],
-        'price' => ['required', 'numeric'],
-        'stock' => ['required', 'integer'],
-        'status' => ['required'],
-        'image' => ['nullable', 'image'],
-    ]);
-
-    if ($request->hasFile('image')) {
-
-        if ($product->image) {
-
-            Storage::disk('public')->delete(
-                $product->image
-            );
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image' => $path,
+                ]);
+            }
         }
 
-        $image = $request->file('image')
-            ->store(
-                'products',
-                'public'
-            );
-
-        $product->image = $image;
+        return redirect()->route('seller.products.index')->with('success', 'Produk berhasil ditambahkan');
     }
 
-    $status = $request->status;
+    public function edit(Product $product)
+    {
+        $product->load('images');
 
-if ($request->stock <= 0) {
-    $status = 'sold_out';
-}
+        return Inertia::render('Seller/Products/Edit', [
+            'product' => $product,
+            'categories' => Category::all(),
+        ]);
+    }
 
-    $product->update([
+    public function show(Product $product)
+    {
+        $product->load([
+            'images',
+            'category',
+            'store',
+            'orderItems.order.user',
+        ]);
+
+        $buyers = $product->orderItems
+            ->map(fn ($item) => $item->order->user)
+            ->unique('id')
+            ->values();
+
+        return Inertia::render('Seller/Products/Show', [
+            'product' => $product,
+            'buyers' => $buyers,
+        ]);
+    }
+
+    public function update(Request $request, Product $product)
+    {
+        $request->validate([
+            'name' => ['required'],
+            'category_id' => ['required'],
+            'description' => ['required'],
+            'price' => ['required', 'numeric'],
+            'stock' => ['required', 'integer'],
+            'status' => ['required'],
+            'image' => ['nullable', 'image', 'max:2048'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['image', 'max:2048'],
+        ]);
+
+        $image = null;
+
+        if ($request->hasFile('image')) {
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+
+            $image = $request->file('image')->store('products', 'public');
+            $product->image = $image;
+        }
+
+        $status = $request->status;
+
+        if ($request->stock <= 0) {
+            $status = 'sold_out';
+        }
+
+        $data = [
     'name' => $request->name,
     'category_id' => $request->category_id,
     'description' => $request->description,
     'price' => $request->price,
     'stock' => $request->stock,
     'status' => $status,
-]);
+];
 
-    if (isset($image)) {
-        $product->image = $image;
-        $product->save();
-    }
-
-    return redirect()
-        ->route('seller.products.index')
-        ->with(
-            'success',
-            'Produk berhasil diperbarui'
-        );
+if ($image) {
+    $data['image'] = $image;
 }
+
+$product->update($data);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $path = $file->store('products/gallery', 'public');
+
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image' => $path,
+                ]);
+            }
+        }
+
+        return redirect()->route('seller.products.index')->with('success', 'Produk berhasil diperbarui');
+    }
 
     public function destroy(Product $product)
     {
         if ($product->image) {
-            Storage::disk('public')->delete(
-                $product->image
-            );
+            Storage::disk('public')->delete($product->image);
         }
 
         $product->delete();

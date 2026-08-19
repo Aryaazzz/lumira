@@ -60,6 +60,18 @@ import { Head, Link } from '@inertiajs/vue3'
                             <h3 class="mt-6 text-xl font-black">Top Up</h3>
                             <p class="mt-2 text-sm leading-6 text-slate-500">Pantau saldo dan transaksi pengguna.</p>
                         </Link>
+
+                        <Link :href="route('admin.banners.index')" class="rounded-[1.6rem] bg-white p-6 text-slate-800 ring-1 ring-slate-200 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/10" data-aos="fade-up" data-aos-delay="200">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-2xl text-slate-500"><i class="fas fa-images"></i></div>
+                            <h3 class="mt-6 text-xl font-black">Banner</h3>
+                            <p class="mt-2 text-sm leading-6 text-slate-500">Kelola banner promosi yang tampil di user.</p>
+                        </Link>
+
+                        <Link :href="route('admin.withdrawals.index')" class="rounded-[1.6rem] bg-white p-6 text-slate-800 ring-1 ring-slate-200 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/10" data-aos="fade-up" data-aos-delay="250">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-2xl text-slate-500"><i class="fas fa-money-bill-transfer"></i></div>
+                            <h3 class="mt-6 text-xl font-black">Tarik Dana</h3>
+                            <p class="mt-2 text-sm leading-6 text-slate-500">Review pengajuan penarikan dana seller.</p>
+                        </Link>
                     </div>
                 </div>
             </div>

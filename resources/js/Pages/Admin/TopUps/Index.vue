@@ -19,12 +19,25 @@ const reject = (id) => {
     router.post(route('admin.topups.reject', id))
 }
 
+const destroy = (id) => {
+    if (!confirm('Hapus riwayat top up ini?')) {
+        return
+    }
+
+    router.delete(route('admin.topups.destroy', id))
+}
+
 const currency = (value) =>
     new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
         maximumFractionDigits: 0,
     }).format(Number(value || 0))
+
+const proofImageUrl = (path) => {
+    if (!path) return ''
+    return path.startsWith('http') ? path : `/storage/${path}`
+}
 
 const statusClass = (status = '') => {
     const normalized = status.toLowerCase()
@@ -70,7 +83,7 @@ const statusClass = (status = '') => {
                 </div>
             </section>
 
-            <section class="mt-8 rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm ring-1 ring-slate-100" data-aos="fade-up">
+            <section class="mt-8 rounded-[1.75rem] border border-slate-200 bg-white/75 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.04)] ring-1 ring-slate-100 backdrop-blur-md" data-aos="fade-up">
                 <div class="mb-5 flex items-center justify-between">
                     <div>
                         <p class="text-sm font-bold uppercase tracking-[0.22em] text-[#0c7c43]">Transaksi</p>
@@ -87,6 +100,7 @@ const statusClass = (status = '') => {
                             <tr class="border-b border-slate-200 text-sm uppercase tracking-[0.14em] text-slate-400">
                                 <th class="py-3 pr-4 font-semibold">User</th>
                                 <th class="py-3 pr-4 font-semibold">Nominal</th>
+                                <th class="py-3 pr-4 font-semibold">Bukti TF</th>
                                 <th class="py-3 pr-4 font-semibold">Status</th>
                                 <th class="py-3 pr-4 font-semibold">Aksi</th>
                             </tr>
@@ -95,6 +109,12 @@ const statusClass = (status = '') => {
                             <tr v-for="topup in sortedTopUps" :key="topup.id" class="border-b border-slate-100 text-sm text-slate-700 last:border-0">
                                 <td class="py-4 pr-4 font-semibold text-slate-900">{{ topup.user?.name ?? '-' }}</td>
                                 <td class="py-4 pr-4 font-bold text-slate-900">{{ currency(topup.amount) }}</td>
+                                <td class="py-4 pr-4">
+                                    <a v-if="proofImageUrl(topup.proof)" :href="proofImageUrl(topup.proof)" target="_blank" rel="noopener noreferrer" class="inline-block">
+                                        <img :src="proofImageUrl(topup.proof)" :alt="`Bukti transfer ${topup.user?.name ?? 'user'}`" class="h-20 w-20 rounded-xl object-cover ring-1 ring-slate-200 shadow-sm transition hover:scale-[1.02]" />
+                                    </a>
+                                    <span v-else class="text-xs font-medium text-slate-400">Belum ada</span>
+                                </td>
                                 <td class="py-4 pr-4">
                                     <span :class="statusClass(topup.status)" class="inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.12em]">
                                         {{ topup.status }}
@@ -109,7 +129,11 @@ const statusClass = (status = '') => {
                                             <i class="fas fa-times mr-1"></i>Reject
                                         </button>
                                     </div>
-                                    <span v-else class="text-xs font-semibold text-slate-400">-</span>
+                                    <div v-else class="flex gap-2">
+                                        <button @click="destroy(topup.id)" class="rounded-xl bg-slate-800 px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-slate-900/15 transition hover:-translate-y-0.5 hover:bg-slate-900">
+                                            <i class="fas fa-trash mr-1"></i>Hapus
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>

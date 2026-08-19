@@ -232,4 +232,12 @@ public function wishlistProducts()
         'wishlists'
     );
 }
+
+public function withdrawals()
+{
+    return $this->hasMany(
+        Withdrawal::class
+    );
+}
+
 }

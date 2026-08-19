@@ -1,26 +1,20 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
-import { computed } from 'vue'
 
 const props = defineProps({
     stats: Object,
-    topSeller: Object,
-    topProduct: Object,
-    latestOrders: Array,
-})
-
-const sortedLatestOrders = computed(() => {
-    return [...props.latestOrders].sort((a, b) => a.id - b.id)
 })
 
 const quickActions = [
-    { label: 'Kelola Pengajuan Seller', href: route('admin.seller.applications'), color: 'bg-[#0c7c43]', icon: 'fa-file-alt' },
-    { label: 'Kelola Seller', href: route('admin.sellers.index'), color: 'bg-slate-700', icon: 'fa-users' },
-    { label: 'Kelola Top Up', href: route('admin.topups.index'), color: 'bg-amber-500', icon: 'fa-wallet' },
-    { label: 'Kelola Kategori', href: route('admin.categories.index'), color: 'bg-sky-600', icon: 'fa-tags' },
-    { label: 'Kelola Pengumuman', href: route('admin.announcements.index'), color: 'bg-violet-600', icon: 'fa-bullhorn' },
-    { label: 'Kelola Produk', href: route('admin.products.index'), color: 'bg-indigo-600', icon: 'fa-boxes' },
+    { label: 'Kelola Pengajuan Seller', href: route('admin.seller.applications'), color: 'bg-[#f3f4f6]', icon: 'fa-file-alt' },
+    { label: 'Kelola Seller', href: route('admin.sellers.index'), color: 'bg-[#eef2f7]', icon: 'fa-users' },
+    { label: 'Kelola Top Up', href: route('admin.topups.index'), color: 'bg-[#f5f5f4]', icon: 'fa-wallet' },
+    { label: 'Kelola Banner', href: route('admin.banners.index'), color: 'bg-[#eefcf3]', icon: 'fa-images' },
+    { label: 'Tarik Dana', href: route('admin.withdrawals.index'), color: 'bg-[#f5f7ef]', icon: 'fa-money-bill-transfer' },
+    { label: 'Kelola Kategori', href: route('admin.categories.index'), color: 'bg-[#f1f5f9]', icon: 'fa-tags' },
+    { label: 'Kelola Pengumuman', href: route('admin.announcements.index'), color: 'bg-[#f8fafc]', icon: 'fa-bullhorn' },
+    { label: 'Kelola Produk', href: route('admin.products.index'), color: 'bg-[#f3f6f3]', icon: 'fa-boxes' },
 ]
 
 const currency = (value) =>
@@ -30,23 +24,6 @@ const currency = (value) =>
         maximumFractionDigits: 0,
     }).format(Number(value || 0))
 
-const statusClass = (status = '') => {
-    const normalized = status.toLowerCase()
-
-    if (normalized.includes('selesai') || normalized.includes('completed'))
-        return 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200'
-
-    if (normalized.includes('diproses') || normalized.includes('processing'))
-        return 'bg-blue-100 text-blue-700 ring-1 ring-blue-200'
-
-    if (normalized.includes('pending') || normalized.includes('menunggu'))
-        return 'bg-amber-100 text-amber-700 ring-1 ring-amber-200'
-
-    if (normalized.includes('batal') || normalized.includes('cancel'))
-        return 'bg-red-100 text-red-700 ring-1 ring-red-200'
-
-    return 'bg-slate-100 text-slate-700 ring-1 ring-slate-200'
-}
 </script>
 
 <template>
@@ -61,6 +38,10 @@ const statusClass = (status = '') => {
                         Dashboard Admin
                     </h2>
                 </div>
+                <Link :href="route('admin.statistics')" class="inline-flex items-center gap-2 rounded-full bg-[#0c7c43] px-4 py-2 text-sm font-bold text-white shadow-lg shadow-green-900/20 transition hover:-translate-y-0.5">
+                    <i class="fas fa-chart-line"></i>
+                    Statistik
+                </Link>
             </div>
         </template>
 
@@ -99,19 +80,19 @@ const statusClass = (status = '') => {
                         v-for="action in quickActions"
                         :key="action.label"
                         :href="action.href"
-                        class="group relative overflow-hidden rounded-[1.5rem] p-4 text-white shadow-lg shadow-slate-900/10 transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                        class="group relative overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white p-4 text-slate-800 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-md"
                         :class="action.color"
                         data-aos="fade-up"
                     >
-                        <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/10"></div>
+                        <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-slate-100"></div>
                         <div class="relative flex items-center justify-between gap-4">
                             <div>
-                                <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-lg shadow-inner ring-1 ring-white/10">
+                                <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-lg text-slate-600 ring-1 ring-slate-200">
                                     <i :class="['fas', action.icon]" aria-hidden="true"></i>
                                 </div>
-                                <p class="text-base font-bold leading-6">{{ action.label }}</p>
+                                <p class="text-base font-bold leading-6 text-slate-800">{{ action.label }}</p>
                             </div>
-                            <span class="text-2xl transition group-hover:translate-x-1">→</span>
+                            <span class="text-2xl text-slate-500 transition group-hover:translate-x-1">→</span>
                         </div>
                     </Link>
                 </div>
@@ -215,124 +196,7 @@ const statusClass = (status = '') => {
                 </div>
             </section>
 
-            <section class="mt-8 grid gap-6 lg:grid-cols-2">
-                <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm ring-1 ring-slate-100" data-aos="fade-right">
-                    <div class="mb-5 flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-bold uppercase tracking-[0.22em] text-[#0c7c43]">Performa</p>
-                            <h3 class="mt-2 text-2xl font-black text-slate-900">Top Seller</h3>
-                        </div>
-                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#edf9ee] text-[#0c7c43]">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                    </div>
 
-                    <div v-if="topSeller" class="rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-200">
-                        <div class="flex items-center gap-4">
-                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0c7c43] to-[#0b2617] text-xl font-black text-white">
-                                {{ topSeller.name?.charAt(0)?.toUpperCase() || 'S' }}
-                            </div>
-                            <div>
-                                <p class="text-xl font-black text-slate-900">{{ topSeller.name }}</p>
-                                <p class="text-sm text-slate-500">Seller unggulan bulan ini</p>
-                            </div>
-                        </div>
-
-                        <div class="mt-5 grid gap-3 sm:grid-cols-2">
-                            <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                                <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Total Sales</p>
-                                <p class="mt-2 text-xl font-black text-slate-900">{{ topSeller.total_sales }}</p>
-                            </div>
-                            <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                                <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Status</p>
-                                <p class="mt-2 text-xl font-black text-emerald-600">Aktif</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div v-else class="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-slate-500">
-                        Belum ada data seller.
-                    </div>
-                </div>
-
-                <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm ring-1 ring-slate-100" data-aos="fade-left">
-                    <div class="mb-5 flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-bold uppercase tracking-[0.22em] text-[#0c7c43]">Produk</p>
-                            <h3 class="mt-2 text-2xl font-black text-slate-900">Produk Terlaris</h3>
-                        </div>
-                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#edf9ee] text-[#0c7c43]">
-                            <i class="fas fa-fire"></i>
-                        </div>
-                    </div>
-
-                    <div v-if="topProduct" class="rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-200">
-                        <div class="flex items-center gap-4">
-                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-xl font-black text-white">
-                                <i class="fas fa-box"></i>
-                            </div>
-                            <div>
-                                <p class="text-xl font-black text-slate-900">{{ topProduct.name }}</p>
-                                <p class="text-sm text-slate-500">Produk paling banyak laku</p>
-                            </div>
-                        </div>
-
-                        <div class="mt-5 grid gap-3 sm:grid-cols-2">
-                            <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                                <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Terjual</p>
-                                <p class="mt-2 text-xl font-black text-slate-900">{{ topProduct.sold_count }}</p>
-                            </div>
-                            <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                                <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Kategori</p>
-                                <p class="mt-2 text-lg font-black text-slate-900">{{ topProduct.category || 'Umum' }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div v-else class="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-slate-500">
-                        Belum ada data produk.
-                    </div>
-                </div>
-            </section>
-
-            <section class="mt-8 rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm ring-1 ring-slate-100" data-aos="fade-up">
-                <div class="mb-5 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-bold uppercase tracking-[0.22em] text-[#0c7c43]">Transaksi</p>
-                        <h3 class="mt-2 text-2xl font-black text-slate-900">Pesanan Terbaru</h3>
-                    </div>
-                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#edf9ee] text-[#0c7c43]">
-                        <i class="fas fa-list"></i>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-left">
-                        <thead>
-                            <tr class="border-b border-slate-200 text-sm uppercase tracking-[0.14em] text-slate-400">
-                                <th class="py-3 pr-4 font-semibold">ID</th>
-                                <th class="py-3 pr-4 font-semibold">User</th>
-                                <th class="py-3 pr-4 font-semibold">Total</th>
-                                <th class="py-3 pr-4 font-semibold">Status</th>
-                                <th class="py-3 pr-4 font-semibold">Tanggal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="order in sortedLatestOrders" :key="order.id" class="border-b border-slate-100 text-sm text-slate-700 last:border-0">
-                                <td class="py-4 pr-4 font-semibold text-slate-900">#{{ order.id }}</td>
-                                <td class="py-4 pr-4">{{ order.user?.name ?? '-' }}</td>
-                                <td class="py-4 pr-4 font-bold text-slate-900">{{ currency(order.total_price) }}</td>
-                                <td class="py-4 pr-4">
-                                    <span :class="statusClass(order.status)" class="inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.12em]">
-                                        {{ order.status }}
-                                    </span>
-                                </td>
-                                <td class="py-4 pr-4">{{ order.created_at }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
         </div>
     </AuthenticatedLayout>
 </template>

@@ -230,14 +230,17 @@ const toggleWishlist = (productId) => {
                         </div>
                     </div>
 
-                    <div class="mt-6 rounded-[1.5rem] bg-[#edf9ee] p-4 text-sm font-bold text-[#0c7c43] ring-1 ring-green-100">
-                        Total: {{ formatCurrency(totalPrice) }}
+                    <div class="mt-6 rounded-2xl bg-gradient-to-r from-[#0c7c43] to-[#0a5f36] p-4 text-white shadow-lg shadow-green-900/20 ring-1 ring-green-600/30">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-bold">Total Belanja:</span>
+                            <span class="text-2xl font-black">{{ formatCurrency(totalPrice) }}</span>
+                        </div>
                     </div>
 
                     <div v-if="$page.props.auth?.user?.role === 'user'" class="mt-6 space-y-3">
                         <button
                             @click="addToCart(product.id)"
-                            class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#0c7c43] to-[#0b2617] px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-green-900/20 transition hover:-translate-y-0.5 hover:shadow-xl"
+                            class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#0c7c43] to-[#0a5f36] px-5 py-4 text-sm font-black text-white shadow-lg shadow-green-900/30 transition hover:-translate-y-1 hover:shadow-xl active:translate-y-0"
                         >
                             <i class="fas fa-shopping-cart"></i>
                             Tambah ke Keranjang
@@ -245,7 +248,7 @@ const toggleWishlist = (productId) => {
 
                         <button
                             @click="startChat(product.id)"
-                            class="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#0c7c43] bg-[#edf9ee] px-5 py-3.5 text-sm font-black text-[#0c7c43] transition hover:bg-[#e1f5e7]"
+                            class="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-[#0c7c43] bg-white px-5 py-4 text-sm font-black text-[#0c7c43] shadow-sm transition hover:bg-[#f0fdf4] hover:-translate-y-1 hover:shadow-md active:translate-y-0"
                         >
                             <i class="fas fa-comments"></i>
                             Chat Penjual
@@ -274,30 +277,30 @@ const toggleWishlist = (productId) => {
                     </div>
                 </div>
 
-                <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
+                <div class="flex flex-wrap gap-2 border-b-2 border-slate-200 pb-4">
                     <button
                         type="button"
                         @click="activeTab = 'description'"
-                        class="rounded-full px-4 py-2 text-sm font-bold transition"
-                        :class="activeTab === 'description' ? 'bg-[#0c7c43] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                        class="rounded-lg px-4 py-3 text-sm font-bold transition duration-200"
+                        :class="activeTab === 'description' ? 'border-b-2 border-[#0c7c43] text-[#0c7c43]' : 'text-slate-600 hover:text-slate-900'"
                     >
-                        Deskripsi
+                        <i class="fas fa-file-alt mr-2"></i>Deskripsi
                     </button>
                     <button
                         type="button"
                         @click="activeTab = 'reviews'"
-                        class="rounded-full px-4 py-2 text-sm font-bold transition"
-                        :class="activeTab === 'reviews' ? 'bg-[#0c7c43] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                        class="rounded-lg px-4 py-3 text-sm font-bold transition duration-200"
+                        :class="activeTab === 'reviews' ? 'border-b-2 border-[#0c7c43] text-[#0c7c43]' : 'text-slate-600 hover:text-slate-900'"
                     >
-                        Review
+                        <i class="fas fa-star mr-2"></i>Review
                     </button>
                     <button
                         type="button"
                         @click="activeTab = 'details'"
-                        class="rounded-full px-4 py-2 text-sm font-bold transition"
-                        :class="activeTab === 'details' ? 'bg-[#0c7c43] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                        class="rounded-lg px-4 py-3 text-sm font-bold transition duration-200"
+                        :class="activeTab === 'details' ? 'border-b-2 border-[#0c7c43] text-[#0c7c43]' : 'text-slate-600 hover:text-slate-900'"
                     >
-                        Detail produk
+                        <i class="fas fa-info-circle mr-2"></i>Detail Produk
                     </button>
                 </div>
 
@@ -361,8 +364,78 @@ const toggleWishlist = (productId) => {
                     </div>
                 </div>
             </section>
+
+            <!-- Seller Info Section -->
+            <section v-if="product?.store" class="mt-8 rounded-[2rem] bg-white p-6 shadow-[0_20px_50px_rgba(15,23,42,0.06)] ring-1 ring-slate-200 md:p-8">
+                <h2 class="text-2xl font-black text-slate-900 mb-6">
+                    <i class="fas fa-store mr-3 text-[#0c7c43]"></i>Informasi Penjual
+                </h2>
+                
+                <div class="grid gap-6 md:grid-cols-3">
+                    <!-- Seller Card -->
+                    <div class="rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white to-slate-50 p-6 hover:border-[#0c7c43] hover:shadow-lg transition duration-300">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0c7c43] to-[#0a5f36] text-2xl text-white">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-black text-slate-900">{{ product?.store?.name }}</h3>
+                                <p class="text-sm text-slate-600">Penjual resmi Lumira</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 rounded-lg bg-slate-100">
+                                <span class="text-sm font-bold text-slate-600">Rating</span>
+                                <span class="font-black text-amber-600">
+                                    <i class="fas fa-star mr-1 text-amber-400"></i>{{ product?.store?.rating ?? 0 }}/5
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 rounded-lg bg-slate-100">
+                                <span class="text-sm font-bold text-slate-600">Review</span>
+                                <span class="font-black text-slate-900">{{ product?.store?.reviews?.length ?? 0 }} review</span>
+                            </div>
+                        </div>
+                        
+                        <button
+                            v-if="$page.props.auth?.user?.role === 'user'"
+                            @click="startChat(product.id)"
+                            class="mt-5 w-full rounded-xl bg-gradient-to-r from-[#0c7c43] to-[#0a5f36] px-4 py-3 text-sm font-black text-white shadow-lg shadow-green-900/20 transition hover:-translate-y-1 hover:shadow-xl"
+                        >
+                            <i class="fas fa-comment-dots mr-2"></i>Chat Sekarang
+                        </button>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="space-y-3">
+                        <div class="rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 p-6 ring-1 ring-emerald-200">
+                            <p class="text-xs font-black uppercase tracking-[0.2em] text-emerald-700">Produk Terjual</p>
+                            <p class="mt-3 text-3xl font-black text-emerald-900">{{ product?.sold_count || 0 }}</p>
+                        </div>
+                        <div class="rounded-2xl bg-gradient-to-br from-blue-50 to-sky-50 p-6 ring-1 ring-blue-200">
+                            <p class="text-xs font-black uppercase tracking-[0.2em] text-blue-700">Produk Aktif</p>
+                            <p class="mt-3 text-3xl font-black text-blue-900">{{ product?.store?.products_count ?? 0 }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Info -->
+                    <div class="space-y-3">
+                        <div class="rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 p-6 ring-1 ring-amber-200">
+                            <p class="text-xs font-black uppercase tracking-[0.2em] text-amber-700">Pengiriman</p>
+                            <p class="mt-3 font-black text-amber-900">Gratis Ongkir</p>
+                            <p class="mt-1 text-sm text-amber-700">Ke seluruh Indonesia</p>
+                        </div>
+                        <div class="rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 p-6 ring-1 ring-purple-200">
+                            <p class="text-xs font-black uppercase tracking-[0.2em] text-purple-700">Respon Cepat</p>
+                            <p class="mt-3 font-black text-purple-900">Aktif 24/7</p>
+                            <p class="mt-1 text-sm text-purple-700">Siap membantu Anda</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
 
         <AppFooter />
     </div>
 </template>
+

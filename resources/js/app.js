@@ -11,21 +11,36 @@ import 'aos/dist/aos.css'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Lumira'
 
+const normalizeImageUrl = (image) => {
+    if (!image) return ''
+    if (image.startsWith('http://') || image.startsWith('https://')) return image
+    if (image.startsWith('/storage/')) return image
+    if (image.startsWith('storage/')) return `/${image}`
+    return `/storage/${image}`
+}
+
 AOS.init({
     duration: 800,
     easing: 'ease-out-cubic',
-    once: true,
+    once: false,
     offset: 40,
-    mirror: false,
+    mirror: true,
     disableMutationObserver: false,
+    anchorPlacement: 'top-bottom',
 })
 
-router.on('finish', () => {
-    AOS.refreshHard()
-})
+const refreshAos = () => {
+    requestAnimationFrame(() => {
+        AOS.refreshHard()
+    })
+}
+
+router.on('finish', refreshAos)
+window.addEventListener('scroll', refreshAos, { passive: true })
+window.addEventListener('resize', refreshAos)
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
+    title: (title) => `${title ? `${title} - ` : ''}${appName}`,
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.vue`,
