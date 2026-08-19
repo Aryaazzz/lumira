@@ -3,6 +3,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { computed, reactive } from 'vue'
 import AppFooter from '@/Components/AppFooter.vue'
+import BackButton from '@/Components/BackButton.vue'
 
 const props = defineProps({
     products: {
@@ -52,9 +53,6 @@ const formatCurrency = (value) =>
         currency: 'IDR',
         maximumFractionDigits: 0,
     }).format(Number(value || 0))
-
-const productImage = (image) =>
-    image ? `/storage/${image}` : 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=900&q=80'
 
 const toggleWishlist = (productId) => {
     if (page.props.auth?.user?.role !== 'user') {
@@ -109,9 +107,7 @@ const resetFilter = () => {
                             <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">Layanan Ulang Material</p>
                         </div>
                     </div>
-                    <Link href="/dashboard" class="rounded-full border border-green-200 bg-white px-4 py-2 text-sm font-bold text-[#0c7c43] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                        <i class="fas fa-arrow-left mr-1"></i>Kembali
-                    </Link>
+                    <BackButton fallback="/dashboard" />
                 </div>
 
                 <div class="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
@@ -257,11 +253,8 @@ const resetFilter = () => {
                     <div class="relative overflow-hidden">
                         <Link :href="route('marketplace.show', product.id)" class="block">
                             <div class="relative overflow-hidden">
-                                <img
-                                    :src="productImage(product.image)"
-                                    :alt="product.name"
-                                    class="h-64 w-full object-cover transition duration-500 group-hover:scale-110"
-                                >
+                                <img v-if="product.image" :src="`/storage/${product.image}`" :alt="product.name" class="h-64 w-full object-cover transition duration-500 group-hover:scale-110">
+                                <div v-else class="flex h-64 items-center justify-center bg-slate-100 text-slate-400"><i class="fas fa-image text-4xl"></i></div>
                                 <div class="absolute inset-0 bg-gradient-to-t from-slate-900/20 via-transparent to-transparent"></div>
                             </div>
                         </Link>

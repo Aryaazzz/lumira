@@ -8,7 +8,11 @@ const props = defineProps({
 })
 
 const sortedOrders = computed(() => {
-    return [...props.orders].sort((a, b) => a.id - b.id)
+    return [...props.orders].sort((a, b) => {
+        const dateDifference = new Date(b.order?.created_at) - new Date(a.order?.created_at)
+
+        return dateDifference || b.id - a.id
+    })
 })
 
 const formatCurrency = (value) =>
@@ -20,6 +24,7 @@ const formatCurrency = (value) =>
 
 const statusClasses = {
     pending: 'bg-amber-100 text-amber-700 ring-amber-200',
+    paid: 'bg-emerald-100 text-emerald-700 ring-emerald-200',
     shipped: 'bg-blue-100 text-blue-700 ring-blue-200',
     completed: 'bg-emerald-100 text-emerald-700 ring-emerald-200',
     cancelled: 'bg-red-100 text-red-700 ring-red-200',
@@ -27,6 +32,7 @@ const statusClasses = {
 
 const statusLabel = {
     pending: 'Menunggu',
+    paid: 'Sudah Dibayar',
     shipped: 'Dikirim',
     completed: 'Selesai',
     cancelled: 'Dibatalkan',
@@ -74,11 +80,8 @@ const completeOrder = (id) => {
                 >
                     <div class="flex flex-col gap-5 border-b border-slate-100 p-5 md:flex-row md:items-center md:justify-between md:p-6">
                         <div class="flex items-center gap-4">
-                            <img
-                                :src="item.product?.image ? `/storage/${item.product.image}` : 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80'"
-                                :alt="item.product?.name"
-                                class="h-20 w-20 rounded-2xl object-cover ring-1 ring-slate-200"
-                            />
+                            <img v-if="item.product?.image" :src="`/storage/${item.product.image}`" :alt="item.product?.name" class="h-20 w-20 rounded-2xl object-cover ring-1 ring-slate-200" />
+                            <div v-else class="flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 ring-1 ring-slate-200"><i class="fas fa-image"></i></div>
                             <div>
                                 <h3 class="text-xl font-black text-slate-900">{{ item.product?.name || 'Produk' }}</h3>
                                 <p class="mt-1 text-sm text-slate-500">Pembeli: {{ item.order?.user?.name || '-' }}</p>
@@ -112,7 +115,7 @@ const completeOrder = (id) => {
 
                         <div class="flex flex-wrap gap-2">
                             <button
-                                v-if="item.order?.status === 'pending'"
+                                v-if="['pending', 'paid'].includes(item.order?.status)"
                                 @click="shipOrder(item.id)"
                                 class="rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700"
                             >

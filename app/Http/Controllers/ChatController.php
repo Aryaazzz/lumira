@@ -6,6 +6,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\Product;
 use App\Models\Notification;
+use App\Models\Order;
 use App\Events\MessageSent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -56,6 +57,27 @@ class ChatController extends Controller
             'chat.show',
             $conversation
         );
+    }
+
+    public function startFromOrder(Order $order)
+    {
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $orderItem = $order->items()->with('product.store')->first();
+
+        if (! $orderItem?->product?->store) {
+            return back()->with('error', 'Penjual produk ini sudah tidak tersedia.');
+        }
+
+        $conversation = Conversation::firstOrCreate([
+            'buyer_id' => auth()->id(),
+            'seller_id' => $orderItem->product->store->user_id,
+            'product_id' => $orderItem->product_id,
+        ]);
+
+        return redirect()->route('chat.show', $conversation);
     }
 
     // Allow a seller to start a chat with a specific buyer for a product

@@ -56,7 +56,7 @@
             <!-- Bottom Section -->
             <div class="flex flex-col items-center justify-between gap-4 md:flex-row pt-4">
                 <p class="text-center text-xs text-slate-500 md:text-left">
-                    © 2026 <span class="font-bold text-white">Lumira</span>. Semua hak dilindungi.
+                    © 2026 <span class="font-bold text-white">LUMIRA</span>. Semua hak dilindungi. Dibuat oleh Tim IGM.
                 </p>
                 <div class="flex gap-6">
                     <a href="#" class="text-slate-400 transition hover:text-emerald-400">

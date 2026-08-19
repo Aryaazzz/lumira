@@ -1,13 +1,23 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import AppFooter from '@/Components/AppFooter.vue';
-import { Link } from '@inertiajs/vue3';
+import BackButton from '@/Components/BackButton.vue';
+import { Link, usePage } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
+const page = usePage();
+const dismissedFlash = ref(false);
+
+watch(
+    () => [page.props.flash?.success, page.props.flash?.error],
+    () => {
+        dismissedFlash.value = false;
+    },
+)
 </script>
 
 <template>
@@ -86,7 +96,35 @@ const showingNavigationDropdown = ref(false);
             </div>
 
             <div :class="{ block: showingNavigationDropdown, hidden: !showingNavigationDropdown }" class="sm:hidden">
-                <div class="space-y-1 border-t border-green-100 bg-white pb-3 pt-2">
+                <div class="space-y-1 border-t border-green-100 bg-white px-3 pb-3 pt-2">
+                    <ResponsiveNavLink v-if="$page.props.auth.user.role === 'user'" :href="route('marketplace')" class="flex min-h-11 items-center gap-3 rounded-xl text-slate-700">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-[#0c7c43]"><i class="fas fa-store text-sm"></i></span>
+                        <span>Marketplace</span>
+                    </ResponsiveNavLink>
+                    <ResponsiveNavLink v-if="$page.props.auth.user.role === 'user'" :href="route('cart.index')" class="flex min-h-11 items-center gap-3 rounded-xl text-slate-700">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600"><i class="fas fa-shopping-cart text-sm"></i></span>
+                        <span>Keranjang</span>
+                    </ResponsiveNavLink>
+                    <ResponsiveNavLink v-if="$page.props.auth.user.role === 'user'" :href="route('orders.index')" class="flex min-h-11 items-center gap-3 rounded-xl text-slate-700">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600"><i class="fas fa-box text-sm"></i></span>
+                        <span>Pesanan Saya</span>
+                    </ResponsiveNavLink>
+                    <ResponsiveNavLink v-if="$page.props.auth.user.role === 'seller'" :href="route('seller.products.index')" class="flex min-h-11 items-center gap-3 rounded-xl text-slate-700">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-[#0c7c43]"><i class="fas fa-boxes text-sm"></i></span>
+                        <span>Produk Saya</span>
+                    </ResponsiveNavLink>
+                    <ResponsiveNavLink v-if="$page.props.auth.user.role === 'seller'" :href="route('seller.orders.index')" class="flex min-h-11 items-center gap-3 rounded-xl text-slate-700">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600"><i class="fas fa-truck text-sm"></i></span>
+                        <span>Pesanan Masuk</span>
+                    </ResponsiveNavLink>
+                    <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('admin.dashboard')" class="flex min-h-11 items-center gap-3 rounded-xl text-slate-700">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-[#0c7c43]"><i class="fas fa-chart-line text-sm"></i></span>
+                        <span>Dashboard Admin</span>
+                    </ResponsiveNavLink>
+                    <ResponsiveNavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('admin.products.index')" class="flex min-h-11 items-center gap-3 rounded-xl text-slate-700">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600"><i class="fas fa-boxes text-sm"></i></span>
+                        <span>Kelola Produk</span>
+                    </ResponsiveNavLink>
                     <ResponsiveNavLink :href="route('notifications.index')" class="flex items-center gap-3 text-slate-700">
                         <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#edf9ee] text-[#0c7c43]">
                             <i class="fas fa-bell text-sm"></i>
@@ -99,9 +137,9 @@ const showingNavigationDropdown = ref(false);
                 </div>
 
                 <div class="border-t border-green-100 pb-1 pt-4">
-                    <div class="px-4">
-                        <div class="text-base font-medium text-slate-800">{{ $page.props.auth.user.name }}</div>
-                        <div class="text-sm font-medium text-slate-500">{{ $page.props.auth.user.email }}</div>
+                    <div class="min-w-0 px-4">
+                        <div class="truncate text-base font-medium text-slate-800">{{ $page.props.auth.user.name }}</div>
+                        <div class="truncate text-sm font-medium text-slate-500">{{ $page.props.auth.user.email }}</div>
                     </div>
 
                     <div class="mt-3 space-y-1">
@@ -128,7 +166,23 @@ const showingNavigationDropdown = ref(false);
             </div>
         </header>
 
-        <main class="flex-1 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div v-if="!dismissedFlash && (page.props.flash?.success || page.props.flash?.error)" class="pointer-events-none fixed inset-x-4 bottom-4 z-[100] sm:left-auto sm:right-5 sm:max-w-md">
+            <div v-if="page.props.flash?.success" class="pointer-events-auto flex items-start gap-3 rounded-2xl border border-emerald-200 bg-white/95 p-4 text-emerald-800 shadow-[0_18px_50px_rgba(12,124,67,0.2)] ring-1 ring-emerald-100 backdrop-blur-xl" role="status">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#edf9ee] text-[#0c7c43]"><i class="fas fa-check-circle"></i></span>
+                <div class="min-w-0 flex-1"><p class="text-xs font-black uppercase tracking-[0.16em] text-[#0c7c43]">Lumira</p><p class="mt-1 break-words text-sm font-semibold">{{ page.props.flash.success }}</p></div>
+                <button type="button" @click="dismissedFlash = true" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700" aria-label="Tutup pemberitahuan"><i class="fas fa-times"></i></button>
+            </div>
+            <div v-else class="pointer-events-auto flex items-start gap-3 rounded-2xl border border-red-200 bg-white/95 p-4 text-red-800 shadow-[0_18px_50px_rgba(185,28,28,0.16)] ring-1 ring-red-100 backdrop-blur-xl" role="alert">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600"><i class="fas fa-exclamation-circle"></i></span>
+                <div class="min-w-0 flex-1"><p class="text-xs font-black uppercase tracking-[0.16em] text-red-600">Perhatian</p><p class="mt-1 break-words text-sm font-semibold">{{ page.props.flash.error }}</p></div>
+                <button type="button" @click="dismissedFlash = true" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700" aria-label="Tutup pemberitahuan"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+
+        <main class="min-w-0 flex-1 mx-auto w-full max-w-7xl overflow-x-hidden px-4 py-8 sm:px-6 lg:px-8">
+            <div class="mb-5 max-w-full">
+                <BackButton fallback="/dashboard" />
+            </div>
             <slot />
         </main>
 

@@ -8,7 +8,11 @@ const props = defineProps({
 })
 
 const sortedNotifications = computed(() => {
-    return [...props.notifications].sort((a, b) => a.id - b.id)
+    return [...(props.notifications ?? [])].sort((a, b) => {
+        const dateDifference = new Date(b.created_at) - new Date(a.created_at)
+
+        return dateDifference || b.id - a.id
+    })
 })
 
 function read(id)
@@ -47,7 +51,7 @@ function readAll()
                 <button
                     v-if="notifications.some(n => !n.is_read)"
                     @click="readAll"
-                    class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-[#0c7c43] shadow-sm ring-1 ring-green-100 transition hover:bg-[#edf9ee]"
+                    class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-[#0c7c43] shadow-sm ring-1 ring-green-100 transition hover:bg-[#edf9ee] sm:w-auto sm:rounded-full"
                 >
                     <i class="fas fa-check-double"></i>
                     Tandai Semua Dibaca
@@ -56,7 +60,7 @@ function readAll()
         </template>
 
         <div class="min-h-screen overflow-x-hidden bg-[#f6f8f6]">
-            <div class="mx-auto max-w-7xl px-6 py-8 lg:px-8">
+            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 
                 <!-- Empty State -->
                 <div
@@ -79,24 +83,24 @@ function readAll()
                         :href="notification.type === 'chat' ? route('chat.index') : route('notifications.index')"
                         data-aos="fade-up"
                         :data-aos-delay="idx * 30"
-                        class="group block rounded-[1.5rem] bg-white shadow-sm ring-1 ring-slate-100 transition duration-300 hover:shadow-lg hover:shadow-green-900/10 overflow-hidden"
+                        class="group block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 transition duration-300 hover:shadow-lg hover:shadow-green-900/10 sm:rounded-[1.5rem]"
                         :class="!notification.is_read ? 'border-l-4 border-[#0c7c43] bg-gradient-to-r from-[#edf9ee] via-white to-white' : ''"
                     >
-                        <div class="p-5">
-                            <div class="flex gap-4">
+                        <div class="p-4 sm:p-5">
+                            <div class="flex items-start gap-3 sm:gap-4">
                                 <!-- Icon -->
-                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full" :class="!notification.is_read ? 'bg-[#0c7c43]/10' : 'bg-slate-100'">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12" :class="!notification.is_read ? 'bg-[#0c7c43]/10' : 'bg-slate-100'">
                                     <i :class="[notification.type === 'chat' ? 'fas fa-comments' : 'fas fa-bell', !notification.is_read ? 'text-[#0c7c43]' : 'text-slate-400']"></i>
                                 </div>
 
                                 <!-- Content -->
                                 <div class="flex-1 min-w-0">
-                                    <div class="flex items-start justify-between gap-3">
+                                    <div class="flex min-w-0 items-start justify-between gap-2 sm:gap-3">
                                         <div class="flex-1 min-w-0">
                                             <h3 class="font-black text-slate-900" :class="!notification.is_read ? 'text-base' : 'text-sm'">
                                                 {{ notification.title }}
                                             </h3>
-                                            <p class="mt-1 text-sm leading-6 text-slate-600">
+                                            <p class="mt-1 break-words text-sm leading-6 text-slate-600">
                                                 {{ notification.message }}
                                             </p>
 

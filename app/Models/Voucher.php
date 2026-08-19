@@ -10,6 +10,7 @@ class Voucher extends Model
         'code',
         'type',
         'value',
+        'min_purchase',
         'scope',
         'user_id',
         'expired_at',
@@ -19,6 +20,7 @@ class Voucher extends Model
     protected $casts = [
         'expired_at' => 'datetime',
         'is_active' => 'boolean',
+        'min_purchase' => 'decimal:2',
     ];
 
     public function user()

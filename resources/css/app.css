@@ -25,6 +25,7 @@
         font-family: var(--font-body);
         line-height: 1.7;
         letter-spacing: -0.01em;
+        overflow-x: hidden;
         background:
             radial-gradient(circle at top left, rgba(34, 197, 94, 0.08), transparent 25%),
             radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.1), transparent 30%),
@@ -58,6 +59,36 @@
         font-weight: 700;
         letter-spacing: 0.16em;
         text-transform: uppercase;
+    }
+}
+
+@media (max-width: 640px) {
+    main {
+        padding-top: 1.25rem !important;
+        padding-bottom: 1.25rem !important;
+    }
+
+    input,
+    textarea,
+    select,
+    button {
+        max-width: 100%;
+    }
+
+    table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .flex {
+        min-width: 0;
+    }
+
+    button,
+    a {
+        max-width: 100%;
+        white-space: normal;
     }
 }
 

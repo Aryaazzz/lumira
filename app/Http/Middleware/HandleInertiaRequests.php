@@ -37,6 +37,11 @@ class HandleInertiaRequests extends Middleware
             'user' => $request->user(),
         ],
 
+        'flash' => [
+            'success' => fn () => $request->session()->get('success'),
+            'error' => fn () => $request->session()->get('error'),
+        ],
+
         'wishlistCount' => function () {
             // Avoid querying DB during console/migrations or when table doesn't exist
             if (app()->runningInConsole() || ! Schema::hasTable('wishlists')) {

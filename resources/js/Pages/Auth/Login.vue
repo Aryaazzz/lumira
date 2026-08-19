@@ -87,7 +87,7 @@ const submit = () => {
 
 
                     <div class="mt-auto text-sm text-green-200/60">
-                        © {{ new Date().getFullYear() }} Lumira
+                        © {{ new Date().getFullYear() }} LUMIRA. Dibuat oleh Tim IGM.
                     </div>
 
                 </div>
@@ -294,6 +294,10 @@ const submit = () => {
                             </p>
 
                         </div>
+
+                        <p class="mt-6 text-center text-xs text-slate-400">
+                            © {{ new Date().getFullYear() }} LUMIRA. Dibuat oleh Tim IGM.
+                        </p>
 
                     </div>
 

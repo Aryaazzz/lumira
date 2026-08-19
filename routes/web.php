@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
+use App\Http\Controllers\Admin\VoucherController as AdminVoucherController;
 
 use App\Http\Controllers\Seller\ProductController;
 use App\Http\Controllers\Seller\SellerOrderController;
@@ -248,6 +249,16 @@ Route::delete(
         [ChatController::class, 'start']
     )->name('chat.start');
 
+    Route::post(
+        '/chat/start-order/{order}',
+        [ChatController::class, 'startFromOrder']
+    )->name('chat.start-order');
+
+    Route::post(
+        '/chat/start/{product}/buyer/{buyer}',
+        [ChatController::class, 'startWithBuyer']
+    )->name('chat.startWith');
+
     Route::get(
         '/chat/{conversation}',
         [ChatController::class, 'show']
@@ -387,6 +398,11 @@ $completedOrders =
     )->name('seller.products.create');
 
     Route::get(
+    '/seller/products/{product}',
+    [ProductController::class, 'show']
+)->name('seller.products.show');
+
+    Route::get(
     '/seller/products/{product}/edit',
     [ProductController::class, 'edit']
 )->name('seller.products.edit');
@@ -405,6 +421,11 @@ Route::put(
         '/seller/products/{product}',
         [ProductController::class, 'destroy']
     )->name('seller.products.destroy');
+
+    Route::post(
+        '/seller/products/{product}/delete',
+        [ProductController::class, 'destroy']
+    )->name('seller.products.delete');
 
     Route::get(
         '/seller/orders',
@@ -526,6 +547,16 @@ Route::post(
 )->name('admin.announcements.store');
 
 Route::get(
+    '/admin/vouchers',
+    [AdminVoucherController::class, 'index']
+)->name('admin.vouchers.index');
+
+Route::post(
+    '/admin/vouchers',
+    [AdminVoucherController::class, 'store']
+)->name('admin.vouchers.store');
+
+Route::get(
     '/admin/categories',
     [CategoryController::class, 'index']
 )->name('admin.categories.index');
@@ -554,6 +585,11 @@ Route::delete(
     '/admin/products/{product}',
     [AdminProductController::class, 'destroy']
 )->name('admin.products.destroy');
+
+Route::post(
+    '/admin/products/{product}/delete',
+    [AdminProductController::class, 'destroy']
+)->name('admin.products.delete');
 
 Route::post(
     '/admin/products/{product}/hide'

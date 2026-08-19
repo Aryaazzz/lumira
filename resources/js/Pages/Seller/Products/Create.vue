@@ -11,7 +11,7 @@ const sortedCategories = computed(() => {
     return [...props.categories].sort((a, b) => a.id - b.id)
 })
 
-const previewImage = ref('')
+const previewImages = ref([])
 
 const form = useForm({
     name: '',
@@ -20,6 +20,7 @@ const form = useForm({
     price: '',
     stock: '',
     image: null,
+    images: [],
 })
 
 const formatCurrency = (value) =>
@@ -30,11 +31,13 @@ const formatCurrency = (value) =>
     }).format(Number(value || 0))
 
 const handleFileChange = (event) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+    const files = Array.from(event.target.files ?? [])
+    if (!files.length) return
 
-    form.image = file
-    previewImage.value = URL.createObjectURL(file)
+    form.image = files[0]
+    form.images = files.slice(1)
+    previewImages.value.forEach((url) => URL.revokeObjectURL(url))
+    previewImages.value = files.map((file) => URL.createObjectURL(file))
 }
 
 function submit() {
@@ -79,7 +82,7 @@ function submit() {
 
                             <div>
                                 <label class="mb-2 block text-sm font-bold text-slate-700">Stok</label>
-                                <input v-model="form.stock" type="number" min="0" placeholder="10" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-800 outline-none transition focus:border-[#0c7c43] focus:bg-white focus:ring-4 focus:ring-green-100" />
+                                <input v-model.number="form.stock" type="number" min="0" placeholder="10" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-800 outline-none transition focus:border-[#0c7c43] focus:bg-white focus:ring-4 focus:ring-green-100" />
                                 <p v-if="form.errors.stock" class="mt-2 text-sm text-red-500">{{ form.errors.stock }}</p>
                             </div>
                         </div>
@@ -102,16 +105,20 @@ function submit() {
                         <div>
                             <label class="mb-2 block text-sm font-bold text-slate-700">Foto Produk</label>
                             <label class="flex cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center transition hover:border-[#0c7c43] hover:bg-[#edf9ee]">
-                                <input type="file" accept="image/*" class="hidden" @change="handleFileChange" />
+                                <input type="file" name="images[]" accept="image/*" multiple class="hidden" @change="handleFileChange" />
                                 <div>
                                     <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white text-xl text-[#0c7c43] shadow-sm ring-1 ring-slate-200">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                     </div>
-                                    <p class="mt-3 text-sm font-bold text-slate-600">Klik untuk upload foto</p>
-                                    <p class="mt-1 text-xs text-slate-500">Format JPG, PNG, WebP</p>
+                                    <p class="mt-3 text-sm font-bold text-slate-600">Klik untuk upload beberapa foto</p>
+                                    <p class="mt-1 text-xs text-slate-500">Foto pertama menjadi foto utama. JPG, PNG, WebP</p>
                                 </div>
                             </label>
                             <p v-if="form.errors.image" class="mt-2 text-sm text-red-500">{{ form.errors.image }}</p>
+                            <p v-if="form.errors.images" class="mt-2 text-sm text-red-500">{{ form.errors.images }}</p>
+                            <div v-if="previewImages.length" class="mt-4 grid grid-cols-3 gap-3">
+                                <img v-for="(image, index) in previewImages" :key="image" :src="image" :alt="`Preview foto ${index + 1}`" class="h-24 w-full rounded-xl object-cover ring-1 ring-slate-200" />
+                            </div>
                         </div>
 
                         <button type="submit" :disabled="form.processing" class="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#0c7c43] to-[#0b2617] px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-green-900/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70">
@@ -124,11 +131,10 @@ function submit() {
                 <div class="rounded-[2rem] bg-gradient-to-br from-[#edf9ee] via-white to-[#f3faf5] p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)] ring-1 ring-green-100 md:p-8">
                     <p class="text-xs font-black uppercase tracking-[0.22em] text-[#0c7c43]">Preview</p>
                     <div class="mt-5 overflow-hidden rounded-[1.75rem] bg-white shadow-lg ring-1 ring-slate-200">
-                        <img
-                            :src="previewImage || 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80'"
-                            alt="Preview produk"
-                            class="h-56 w-full object-cover"
-                        />
+                        <img v-if="previewImages[0]" :src="previewImages[0]" alt="Preview produk" class="h-56 w-full object-cover" />
+                        <div v-else class="flex h-56 items-center justify-center bg-slate-100 text-slate-400">
+                            <i class="fas fa-image text-4xl"></i>
+                        </div>
                         <div class="space-y-4 p-5">
                             <div>
                                 <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Barang daur ulang</p>

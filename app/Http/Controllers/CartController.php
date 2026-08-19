@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
+use App\Models\Notification;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -24,6 +25,10 @@ class CartController extends Controller
 
     public function add(Product $product)
     {
+        if ($product->status !== 'active' || $product->stock < 1) {
+            return back()->with('error', 'Barang telah habis dan tidak dapat dibeli.');
+        }
+
         $cart = Cart::firstOrCreate([
             'user_id' => auth()->id()
         ]);
@@ -33,6 +38,9 @@ class CartController extends Controller
             ->first();
 
         if ($item) {
+            if ($item->quantity >= $product->stock) {
+                return back()->with('error', 'Jumlah melebihi stok yang tersedia.');
+            }
             $item->increment('quantity');
         } else {
             $cart->items()->create([
@@ -40,6 +48,13 @@ class CartController extends Controller
                 'quantity' => 1,
             ]);
         }
+
+        Notification::create([
+            'user_id' => auth()->id(),
+            'title' => 'Produk Masuk Keranjang',
+            'message' => $product->name . ' berhasil dimasukkan ke keranjang.',
+            'type' => 'cart',
+        ]);
 
         return back()->with(
             'success',
@@ -79,11 +94,17 @@ class CartController extends Controller
         )->first();
 
         if ($cart) {
-            $cart->items()
-                ->where('id', $id)
-                ->update([
-                    'quantity' => $request->quantity
-                ]);
+            $item = $cart->items()->with('product')->where('id', $id)->first();
+
+            if (! $item) {
+                return back()->with('error', 'Item keranjang tidak ditemukan.');
+            }
+
+            if ($item->product->status !== 'active' || $request->quantity > $item->product->stock) {
+                return back()->with('error', 'Jumlah melebihi stok yang tersedia.');
+            }
+
+            $item->update(['quantity' => $request->quantity]);
         }
 
         return back();

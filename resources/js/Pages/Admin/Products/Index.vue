@@ -21,7 +21,9 @@ const showProduct = (id) => {
 
 const deleteProduct = (id) => {
     if (!confirm('Hapus produk ini?')) return
-    router.delete(route('admin.products.destroy', id))
+    router.post(route('admin.products.delete', id), {
+        preserveScroll: true,
+    })
 }
 
 const currency = (value) =>

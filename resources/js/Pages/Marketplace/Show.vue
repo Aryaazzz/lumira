@@ -1,7 +1,8 @@
 <script setup>
-import { Head, router } from '@inertiajs/vue3'
-import { computed, ref } from 'vue'
+import { Head, router, usePage } from '@inertiajs/vue3'
+import { computed, ref, watch } from 'vue'
 import AppFooter from '@/Components/AppFooter.vue'
+import BackButton from '@/Components/BackButton.vue'
 
 const props = defineProps({
     product: {
@@ -17,14 +18,18 @@ const props = defineProps({
 const quantity = ref(1)
 const selectedImage = ref(0)
 const activeTab = ref('description')
+const page = usePage()
+const dismissedFlash = ref(false)
+
+watch(
+    () => [page.props.flash?.success, page.props.flash?.error],
+    () => {
+        dismissedFlash.value = false
+    },
+)
 
 const mainImage = computed(() => {
-    const gallery = [
-        props.product?.image,
-        'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80',
-    ]
-
-    return gallery[selectedImage.value] ? `/storage/${gallery[selectedImage.value]}` : gallery[1]
+    return galleryImages.value[selectedImage.value] || ''
 })
 
 const formatCurrency = (value) =>
@@ -43,8 +48,9 @@ const galleryImages = computed(() => {
         list.push(`/storage/${props.product.image}`)
     }
 
-    list.push('https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80')
-    list.push('https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1200&q=80')
+    for (const image of props.product?.images ?? []) {
+        if (image.image) list.push(`/storage/${image.image}`)
+    }
 
     return [...new Set(list)]
 })
@@ -54,6 +60,8 @@ const startChat = (productId) => {
 }
 
 const addToCart = (productId) => {
+    if (!props.product?.stock || props.product.stock < 1) return
+
     router.post(route('cart.add', productId), {
         quantity: quantity.value,
     })
@@ -77,9 +85,24 @@ const toggleWishlist = (productId) => {
     <Head :title="product?.name || 'Detail Produk'" />
 
     <div class="min-h-screen bg-[#f5faf6] text-slate-800">
+        <div v-if="!dismissedFlash && (page.props.flash?.success || page.props.flash?.error)" class="pointer-events-none fixed inset-x-4 bottom-4 z-[100] sm:left-auto sm:right-5 sm:max-w-md">
+            <div v-if="page.props.flash?.success" class="pointer-events-auto flex items-start gap-3 rounded-2xl border border-emerald-200 bg-white/95 p-4 text-emerald-800 shadow-[0_18px_50px_rgba(12,124,67,0.2)] ring-1 ring-emerald-100 backdrop-blur-xl" role="status">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#edf9ee] text-[#0c7c43]"><i class="fas fa-shopping-cart"></i></span>
+                <div class="min-w-0 flex-1"><p class="text-xs font-black uppercase tracking-[0.16em] text-[#0c7c43]">Keranjang Lumira</p><p class="mt-1 break-words text-sm font-semibold">{{ page.props.flash.success }}</p></div>
+                <button type="button" @click="dismissedFlash = true" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100" aria-label="Tutup pemberitahuan"><i class="fas fa-times"></i></button>
+            </div>
+            <div v-else class="pointer-events-auto flex items-start gap-3 rounded-2xl border border-red-200 bg-white/95 p-4 text-red-800 shadow-[0_18px_50px_rgba(185,28,28,0.16)] ring-1 ring-red-100 backdrop-blur-xl" role="alert">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600"><i class="fas fa-exclamation-circle"></i></span>
+                <div class="min-w-0 flex-1"><p class="text-xs font-black uppercase tracking-[0.16em] text-red-600">Perhatian</p><p class="mt-1 break-words text-sm font-semibold">{{ page.props.flash.error }}</p></div>
+                <button type="button" @click="dismissedFlash = true" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100" aria-label="Tutup pemberitahuan"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
         <!-- Hero Header -->
         <div class="bg-gradient-to-br from-[#edf9ee] via-white to-[#f3faf5] px-4 py-8 shadow-sm sm:px-6 lg:px-8" data-aos="fade-down" data-aos-duration="600">
             <div class="mx-auto max-w-7xl">
+                <div class="mb-4">
+                    <BackButton fallback="/marketplace" />
+                </div>
                 <nav class="mb-6 flex items-center gap-3 text-sm text-slate-600">
                     <Link href="/marketplace" class="flex items-center gap-2 font-semibold text-[#0c7c43] transition hover:text-[#0a6d3a]">
                         <img src="/images/lumira.png" alt="LUMIRA" class="h-12 w-12" />
@@ -224,7 +247,7 @@ const toggleWishlist = (productId) => {
                                 −
                             </button>
                             <span class="w-12 text-center text-lg font-black text-slate-800">{{ quantity }}</span>
-                            <button type="button" @click="quantity = quantity + 1" class="flex h-10 w-10 items-center justify-center rounded-xl text-xl font-bold text-slate-600 transition hover:bg-white">
+                            <button type="button" @click="quantity = Math.min(product.stock, quantity + 1)" :disabled="quantity >= product.stock" class="flex h-10 w-10 items-center justify-center rounded-xl text-xl font-bold text-slate-600 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40">
                                 +
                             </button>
                         </div>
@@ -237,7 +260,11 @@ const toggleWishlist = (productId) => {
                         </div>
                     </div>
 
-                    <div v-if="$page.props.auth?.user?.role === 'user'" class="mt-6 space-y-3">
+                    <div v-if="product?.stock < 1" class="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700" role="alert">
+                        <i class="fas fa-exclamation-circle mr-2"></i>Barang telah habis dan tidak dapat dibeli.
+                    </div>
+
+                    <div v-if="$page.props.auth?.user?.role === 'user' && product?.stock > 0" class="mt-6 space-y-3">
                         <button
                             @click="addToCart(product.id)"
                             class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#0c7c43] to-[#0a5f36] px-5 py-4 text-sm font-black text-white shadow-lg shadow-green-900/30 transition hover:-translate-y-1 hover:shadow-xl active:translate-y-0"

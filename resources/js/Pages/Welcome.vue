@@ -46,11 +46,11 @@ const formatCurrency = (value) =>
     }).format(Number(value || 0))
 
 const img = {
-    hero: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=1200&auto=format&fit=crop',
+    hero: 'https://i.pinimg.com/1200x/e2/e0/e3/e2e0e34bba2597175fa84c190928c204.jpg',
     plastic: 'https://images.unsplash.com/photo-1572964734607-0051976fac79?q=80&w=900&auto=format&fit=crop',
     paper: 'https://images.unsplash.com/photo-1720788613534-fbfce4cf7495?q=80&w=900&auto=format&fit=crop',
     metal: 'https://images.unsplash.com/photo-1671362935207-d9abfc5b9509?q=80&w=900&auto=format&fit=crop',
-    reusable: 'https://images.unsplash.com/photo-1543436115-0d6fbe97ece0?q=80&w=900&auto=format&fit=crop',
+    reusable: 'https://i.pinimg.com/736x/3a/15/b9/3a15b9614d5bc65e9087fe7b6ae40698.jpg',
     environment: 'https://images.unsplash.com/photo-1746565212969-2e1c7fbe9a82?q=80&w=1200&auto=format&fit=crop',
 }
 
@@ -111,6 +111,7 @@ function resetTilt(e) {
     el.style.setProperty('--tz', '0px')
 }
 
+
 function liftTilt(e) {
     e.currentTarget.style.setProperty('--tz', '18px')
 }
@@ -146,7 +147,7 @@ onUnmounted(() => {
             class="sticky top-0 z-50 transition-all duration-500"
             :class="scrolled ? 'bg-white/95 shadow-sm backdrop-blur-xl' : 'bg-white/70 backdrop-blur-md'"
         >
-            <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3 lg:px-8">
+            <div class="mx-auto flex max-w-7xl items-center gap-3 px-3 py-3 sm:gap-4 sm:px-6 lg:px-8">
 
                 <Link href="/" class="group flex shrink-0 items-center gap-3">
                     <img src="/images/lumira.png" alt="LUMIRA" class="h-11 w-11" />
@@ -160,7 +161,8 @@ onUnmounted(() => {
 
                 <div class="hidden flex-1 lg:block"></div>
 
-                <div class="flex shrink-0 items-center gap-2">
+                <div class="min-w-0 flex-1 overflow-x-auto overscroll-contain py-1 lg:flex-none lg:overflow-visible">
+                    <div class="flex w-max min-w-full shrink-0 items-center justify-end gap-2 lg:w-auto">
                     <template v-if="canLogin">
                         <template v-if="isLoggedIn">
                             <div class="hidden items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm sm:flex">
@@ -213,6 +215,7 @@ onUnmounted(() => {
                             </Link>
                         </template>
                     </template>
+                    </div>
                 </div>
 
             </div>
@@ -524,10 +527,7 @@ onUnmounted(() => {
                             <h3 class="mt-5 text-[2.15rem] font-black leading-none tracking-[-0.07em] text-slate-900">{{ cat.title }}</h3>
                             <p class="mt-3 text-sm leading-7 text-slate-500">{{ cat.desc }}</p>
 
-                            <div class="mt-5 inline-flex items-center gap-2 rounded-full border border-[#dfeee3] bg-[#edf9ee] px-3 py-1.5 text-sm font-bold text-[#0c7c43] transition duration-300 group-hover:bg-[#0c7c43] group-hover:text-white">
-                                Lihat semua
-                                <span class="transition group-hover:translate-x-1">→</span>
-                            </div>
+                
                         </div>
                     </div>
                 </div>

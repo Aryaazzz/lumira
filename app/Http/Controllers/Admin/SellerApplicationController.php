@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SellerApplication;
 use App\Models\Store;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -51,6 +52,13 @@ class SellerApplicationController extends Controller
             'description' => $sellerApplication->description,
         ]);
 
+        Notification::create([
+            'user_id' => $user->id,
+            'title' => 'Pengajuan Seller Disetujui',
+            'message' => 'Pengajuan seller Anda telah disetujui admin.',
+            'type' => 'seller_application',
+        ]);
+
         return back()->with(
             'success',
             'Seller berhasil diapprove'
@@ -69,6 +77,13 @@ class SellerApplicationController extends Controller
 
         $sellerApplication->user->update([
             'seller_status' => 'rejected',
+        ]);
+
+        Notification::create([
+            'user_id' => $sellerApplication->user_id,
+            'title' => 'Pengajuan Seller Ditolak',
+            'message' => 'Pengajuan seller Anda belum disetujui admin.',
+            'type' => 'seller_application',
         ]);
 
         return back()->with(

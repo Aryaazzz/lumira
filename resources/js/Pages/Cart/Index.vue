@@ -8,6 +8,7 @@ const props = defineProps({
 
 const form = useForm({
     payment_method: 'balance',
+    voucher_code: '',
 });
 
 const removeItem = (id) => {
@@ -88,8 +89,8 @@ const checkout = () => {
                             <div class="grid gap-4 sm:grid-cols-[120px_1fr_auto]">
                                 <!-- Product Image -->
                                 <div class="overflow-hidden rounded-2xl bg-gradient-to-br from-[#edf9ee] to-[#f6f8f6]">
-                                    <div v-if="item.product.images && item.product.images.length > 0" class="h-28 w-full">
-                                        <img :src="item.product.images[0].image_url" :alt="item.product.name" class="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+                                    <div v-if="item.product.image" class="h-28 w-full">
+                                        <img :src="`/storage/${item.product.image}`" :alt="item.product.name" class="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
                                     </div>
                                     <div v-else class="flex h-28 w-full items-center justify-center text-slate-400">
                                         <i class="fas fa-box text-3xl"></i>
@@ -109,6 +110,9 @@ const checkout = () => {
                                             -{{ item.product.discount }}%
                                         </span>
                                     </div>
+                                    <p v-if="item.product.stock < item.quantity" class="mt-2 text-xs font-bold text-red-600">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>Stok tersedia hanya {{ item.product.stock }}.
+                                    </p>
                                 </div>
 
                                 <!-- Quantity & Actions -->
@@ -167,6 +171,15 @@ const checkout = () => {
                                     <span class="text-lg font-black text-slate-900">Total</span>
                                     <span class="text-2xl font-black text-[#0c7c43]">Rp {{ Number(totalPrice()).toLocaleString('id-ID') }}</span>
                                 </div>
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div class="rounded-[1.5rem] bg-white p-6 shadow-sm ring-1 ring-slate-100">
+                                <h3 class="text-sm font-black uppercase tracking-[0.2em] text-slate-600">Voucher</h3>
+                                <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+                                    <input v-model="form.voucher_code" type="text" placeholder="Contoh: LUMIRA10" class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm uppercase outline-none focus:border-[#0c7c43] focus:bg-white focus:ring-4 focus:ring-green-100" />
+                                </div>
+                                <p class="mt-2 text-xs text-slate-500">Masukkan kode voucher jika tersedia.</p>
                             </div>
 
                             <!-- Payment Method -->

@@ -21,12 +21,9 @@ function destroyProduct(id) {
         return
     }
 
-    router.delete(
-        route(
-            'seller.products.destroy',
-            id
-        )
-    )
+    router.post(route('admin.products.delete', id), {
+        preserveScroll: true,
+    })
 }
 </script>
 

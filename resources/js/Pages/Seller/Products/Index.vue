@@ -18,12 +18,11 @@ const formatCurrency = (value) =>
         maximumFractionDigits: 0,
     }).format(Number(value || 0))
 
-const productImage = (image) =>
-    image ? `/storage/${image}` : 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80'
-
 const removeProduct = (id) => {
     if (confirm('Hapus produk ini?')) {
-        router.delete(`/seller/products/${id}`)
+        router.post(route('seller.products.delete', id), {
+            preserveScroll: true,
+        })
     }
 }
 
@@ -89,11 +88,8 @@ const totalRevenue = props.products.reduce((sum, product) => sum + Number(produc
                     class="group overflow-hidden rounded-[1.75rem] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)] ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-[0_25px_60px_rgba(12,124,67,0.15)]"
                 >
                     <div class="relative overflow-hidden">
-                        <img
-                            :src="productImage(product.image)"
-                            :alt="product.name"
-                            class="h-60 w-full object-cover transition duration-500 group-hover:scale-105"
-                        >
+                        <img v-if="product.image" :src="`/storage/${product.image}`" :alt="product.name" class="h-60 w-full object-cover transition duration-500 group-hover:scale-105">
+                        <div v-else class="flex h-60 items-center justify-center bg-slate-100 text-slate-400"><i class="fas fa-image text-4xl"></i></div>
                         <div class="absolute left-4 top-4 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#0c7c43] shadow-sm">
                             {{ product.stock > 0 ? 'Ready' : 'Habis' }}
                         </div>
@@ -128,10 +124,10 @@ const totalRevenue = props.products.reduce((sum, product) => sum + Number(produc
                                 <i class="fas fa-trash-alt mr-2"></i>Hapus
                             </button>
                             <Link
-                                :href="`/marketplace/${product.id}`"
+                                :href="route('seller.products.show', product.id)"
                                 class="flex-1 rounded-2xl border border-[#0c7c43] bg-[#edf9ee] px-4 py-2.5 text-center text-sm font-bold text-[#0c7c43] transition hover:bg-[#e2f5e8]"
                             >
-                                Lihat
+                                Kelola
                             </Link>
                         </div>
                     </div>

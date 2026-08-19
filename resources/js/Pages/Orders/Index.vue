@@ -9,7 +9,11 @@ const props = defineProps({
 })
 
 const sortedOrders = computed(() => {
-    return [...props.orders].sort((a, b) => a.id - b.id)
+    return [...(props.orders ?? [])].sort((a, b) => {
+        const dateDifference = new Date(b.created_at) - new Date(a.created_at)
+
+        return dateDifference || b.id - a.id
+    })
 })
 
 const form = useForm({
@@ -140,8 +144,8 @@ const startChat = (orderId) => {
                         >
                             <!-- Product Image -->
                             <div class="overflow-hidden rounded-xl bg-gradient-to-br from-[#edf9ee] to-[#f6f8f6]">
-                                <div v-if="item.product.images && item.product.images.length > 0" class="h-24 w-full">
-                                    <img :src="item.product.images[0].image_url" :alt="item.product.name" class="h-full w-full object-cover" />
+                                <div v-if="item.product?.image" class="h-24 w-full">
+                                    <img :src="`/storage/${item.product.image}`" :alt="item.product?.name || 'Produk'" class="h-full w-full object-cover" />
                                 </div>
                                 <div v-else class="flex h-24 w-full items-center justify-center text-slate-400">
                                     <i class="fas fa-box text-2xl"></i>
@@ -150,7 +154,7 @@ const startChat = (orderId) => {
 
                             <!-- Product Details -->
                             <div>
-                                <h4 class="font-black text-slate-900 line-clamp-2">{{ item.product.name }}</h4>
+                                <h4 class="font-black text-slate-900 line-clamp-2">{{ item.product?.name || 'Produk sudah tidak tersedia' }}</h4>
                                 <p class="mt-1 text-xs text-slate-500">{{ item.quantity }}x @ Rp {{ Number(item.price).toLocaleString('id-ID') }}</p>
                                 <p class="mt-2 text-sm font-bold text-[#0c7c43]">Rp {{ Number(item.price * item.quantity).toLocaleString('id-ID') }}</p>
                             </div>
@@ -163,7 +167,7 @@ const startChat = (orderId) => {
                     </div>
 
                     <!-- Review Section -->
-                    <div v-if="order.status === 'completed' && !order.review" class="border-t border-slate-100 bg-gradient-to-r from-amber-50 to-yellow-50 p-5">
+                    <div v-if="order.status === 'completed' && !order.review && order.items.some((item) => item.product)" class="border-t border-slate-100 bg-gradient-to-r from-amber-50 to-yellow-50 p-5">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-200 text-amber-700">
                                 <i class="fas fa-star"></i>
@@ -236,6 +240,7 @@ const startChat = (orderId) => {
                         
                         <div class="flex gap-2 flex-wrap justify-end">
                             <button
+                                v-if="order.items.some((item) => item.product?.store_id || item.product?.store)"
                                 @click="startChat(order.id)"
                                 class="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold bg-gradient-to-r from-[#0c7c43] to-[#0a5f36] text-white shadow-md hover:-translate-y-1 hover:shadow-lg transition"
                             >
@@ -244,6 +249,7 @@ const startChat = (orderId) => {
                             </button>
                             
                             <a
+                                v-if="order.items[0]?.product"
                                 :href="route('marketplace.show', order.items[0]?.product_id)"
                                 class="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold border-2 border-slate-300 text-slate-700 hover:border-[#0c7c43] hover:text-[#0c7c43] hover:bg-[#f0fdf4] transition"
                             >

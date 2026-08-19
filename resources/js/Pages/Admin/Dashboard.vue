@@ -15,6 +15,7 @@ const quickActions = [
     { label: 'Kelola Kategori', href: route('admin.categories.index'), color: 'bg-[#f1f5f9]', icon: 'fa-tags' },
     { label: 'Kelola Pengumuman', href: route('admin.announcements.index'), color: 'bg-[#f8fafc]', icon: 'fa-bullhorn' },
     { label: 'Kelola Produk', href: route('admin.products.index'), color: 'bg-[#f3f6f3]', icon: 'fa-boxes' },
+    { label: 'Kelola Voucher', href: route('admin.vouchers.index'), color: 'bg-[#fff7ed]', icon: 'fa-ticket-alt' },
 ]
 
 const currency = (value) =>

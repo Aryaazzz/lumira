@@ -17,6 +17,7 @@ const form = useForm({
     code: '',
     type: 'fixed',
     value: '',
+    min_purchase: 0,
     scope: 'all',
     user_id: '',
     expired_at: '',
@@ -29,7 +30,10 @@ const formatRupiah = (value) => Number(value || 0).toLocaleString('id-ID', {
 })
 
 const submit = () => {
-    form.post(route('admin.vouchers.store'))
+    form.transform((data) => ({
+        ...data,
+        value: data.type === 'free_shipping' ? 0 : data.value,
+    })).post(route('admin.vouchers.store'))
 }
 </script>
 
@@ -57,14 +61,21 @@ const submit = () => {
                                 <label class="mb-1 block text-sm font-medium text-gray-700">Jenis</label>
                                 <select v-model="form.type" class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200">
                                     <option value="fixed">Potongan Tetap</option>
-                                    <option value="percentage">Persen</option>
+                                    <option value="percentage">Diskon Persen</option>
+                                    <option value="free_shipping">Gratis Ongkir</option>
                                 </select>
                             </div>
 
                             <div>
-                                <label class="mb-1 block text-sm font-medium text-gray-700">Nilai</label>
-                                <input v-model="form.value" type="number" min="0" class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200" placeholder="10000" />
+                                <label class="mb-1 block text-sm font-medium text-gray-700">Nilai Diskon</label>
+                                <input v-model="form.value" :disabled="form.type === 'free_shipping'" type="number" min="0" class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 disabled:bg-slate-100" :placeholder="form.type === 'percentage' ? '10' : '10000'" />
                             </div>
+                        </div>
+
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-gray-700">Minimum Belanja</label>
+                            <input v-model.number="form.min_purchase" type="number" min="0" class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200" placeholder="10000" />
+                            <p class="mt-1 text-xs text-slate-500">Isi 0 jika voucher tidak memiliki minimum belanja.</p>
                         </div>
 
                         <div>
@@ -116,7 +127,11 @@ const submit = () => {
                             <div class="mt-3 grid gap-3 text-sm text-slate-600 md:grid-cols-2">
                                 <div class="rounded-lg bg-slate-50 p-3">
                                     <p class="font-medium text-slate-700">Nilai</p>
-                                    <p class="mt-1">{{ voucher.type === 'percentage' ? `${voucher.value}%` : formatRupiah(voucher.value) }}</p>
+                                    <p class="mt-1">{{ voucher.type === 'free_shipping' ? 'Gratis ongkir' : voucher.type === 'percentage' ? `${voucher.value}%` : formatRupiah(voucher.value) }}</p>
+                                </div>
+                                <div class="rounded-lg bg-slate-50 p-3">
+                                    <p class="font-medium text-slate-700">Minimum Belanja</p>
+                                    <p class="mt-1">{{ voucher.min_purchase > 0 ? formatRupiah(voucher.min_purchase) : 'Tanpa minimum' }}</p>
                                 </div>
                                 <div class="rounded-lg bg-slate-50 p-3">
                                     <p class="font-medium text-slate-700">Kedaluwarsa</p>

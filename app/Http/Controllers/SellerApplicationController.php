@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\SellerApplication;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -72,6 +74,15 @@ class SellerApplicationController extends Controller
         auth()->user()->update([
             'seller_status' => 'pending',   
         ]);
+
+        User::where('role', 'admin')->each(function (User $admin) {
+            Notification::create([
+                'user_id' => $admin->id,
+                'title' => 'Pengajuan Seller Baru',
+                'message' => auth()->user()->name . ' mengirim pengajuan seller yang membutuhkan persetujuan.',
+                'type' => 'seller_application',
+            ]);
+        });
 
         return redirect()
             ->route('seller.apply')

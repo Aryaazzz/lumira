@@ -9,6 +9,7 @@ use App\Models\Voucher;
 use App\Models\PlatformSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CheckoutController extends Controller
 {
@@ -43,6 +44,12 @@ class CheckoutController extends Controller
                 'error',
                 'Keranjang kosong'
             );
+        }
+
+        foreach ($cart->items as $item) {
+            if ($item->product->status !== 'active' || $item->product->stock < $item->quantity) {
+                return back()->with('error', 'Stok produk ' . $item->product->name . ' tidak mencukupi atau telah habis.');
+            }
         }
 
         $total = 0;
@@ -92,6 +99,13 @@ if ($request->filled('voucher_code')) {
         );
     }
 
+    if ($total < (float) ($voucher->min_purchase ?? 0)) {
+        return back()->with(
+            'error',
+            'Voucher ini berlaku untuk minimum belanja Rp ' . number_format($voucher->min_purchase, 0, ',', '.') . '.'
+        );
+    }
+
     if (
         $voucher->expired_at &&
         now()->gt(
@@ -105,10 +119,9 @@ if ($request->filled('voucher_code')) {
         );
     }
 
-    if (
-        $voucher->type ===
-        'percentage'
-    ) {
+    if ($voucher->type === 'free_shipping') {
+        $discount = 0;
+    } elseif ($voucher->type === 'percentage') {
 
         $discount =
             ($total * $voucher->value)
@@ -127,6 +140,18 @@ if ($request->filled('voucher_code')) {
 
 $finalTotal =
     $total - $discount;
+
+$voucherAnnouncement = null;
+
+if ($voucher) {
+    if ($voucher->type === 'free_shipping') {
+        $voucherAnnouncement = 'Voucher ' . $voucher->code . ' berhasil digunakan. Anda mendapatkan gratis ongkir.';
+    } elseif ($voucher->type === 'percentage') {
+        $voucherAnnouncement = 'Voucher ' . $voucher->code . ' berhasil digunakan. Anda mendapatkan diskon ' . rtrim(rtrim(number_format((float) $voucher->value, 2, '.', ''), '0'), '.') . '% sebesar Rp ' . number_format($discount, 0, ',', '.') . '.';
+    } else {
+        $voucherAnnouncement = 'Voucher ' . $voucher->code . ' berhasil digunakan. Anda mendapatkan potongan Rp ' . number_format($discount, 0, ',', '.') . '.';
+    }
+}
 
        if (
     $request->payment_method === 'balance' &&
@@ -184,33 +209,54 @@ $finalTotal =
 
             foreach ($cart->items as $item) {
 
+                $product = \App\Models\Product::whereKey($item->product_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $product || $product->status !== 'active' || $product->stock < $item->quantity) {
+                    throw ValidationException::withMessages([
+                        'stock' => 'Stok produk ' . ($product?->name ?? 'tidak dikenal') . ' tidak mencukupi atau telah habis.',
+                    ]);
+                }
+
                 $order->items()->create([
                     'product_id' => $item->product_id,
                     'quantity' => $item->quantity,
-                    'price' => $item->product->price,
+                    'price' => $product->price,
                 ]);
 
                 Notification::create([
-                    'user_id' => $item->product->store->user_id,
+                    'user_id' => $product->store->user_id,
                     'title' => 'Pesanan Baru',
                     'message' =>
                         $user->name .
                         ' membeli produk ' .
-                        $item->product->name,
+                        $product->name,
                     'type' => 'order',
                 ]);
 
-                $item->product->decrement(
+                Notification::create([
+                    'user_id' => $user->id,
+                    'title' => 'Pembelian Berhasil',
+                    'message' => 'Pesanan produk ' . $product->name . ' berhasil dibuat.',
+                    'type' => 'order',
+                ]);
+
+                $product->decrement(
                     'stock',
                     $item->quantity
                 );
 
-                $item->product->increment(
+                $product->increment(
                     'sold_count',
                     $item->quantity
                 );
 
-                $item->product
+                if ($product->stock <= 0) {
+                    $product->update(['status' => 'sold_out']);
+                }
+
+                $product
                     ->store
                     ->increment(
                         'total_sales',
@@ -223,9 +269,8 @@ $finalTotal =
 
         return redirect()
             ->route('cart.index')
-            ->with(
-                'success',
-                'Pesanan berhasil dibuat'
-            );
+            ->with('success', $voucherAnnouncement
+                ? 'Pesanan berhasil dibuat. ' . $voucherAnnouncement
+                : 'Pesanan berhasil dibuat.');
     }
 }

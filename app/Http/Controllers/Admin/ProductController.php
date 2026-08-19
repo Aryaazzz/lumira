@@ -49,8 +49,22 @@ class ProductController extends Controller
         );
     }
 
-    public function destroy(Product $product)
+    public function destroy($productId)
     {
+        $product = Product::with('images')->find($productId);
+
+        if (! $product) {
+            return back()->with('error', 'Produk sudah tidak tersedia atau telah dihapus.');
+        }
+
+        if ($product->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
+        }
+
+        foreach ($product->images as $image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($image->image);
+        }
+
         $product->delete();
 
         return back()->with(

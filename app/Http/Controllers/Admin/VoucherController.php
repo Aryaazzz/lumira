@@ -27,8 +27,9 @@ class VoucherController extends Controller
 
         $request->validate([
             'code' => ['required', 'string', 'max:50', 'unique:vouchers,code'],
-            'type' => ['required', 'in:percentage,fixed'],
-            'value' => ['required', 'numeric', 'min:0'],
+            'type' => ['required', 'in:percentage,fixed,free_shipping'],
+            'value' => ['required', 'numeric', 'min:0', 'max_if:type,percentage,100'],
+            'min_purchase' => ['nullable', 'numeric', 'min:0'],
             'scope' => ['required', 'in:all,user'],
             'user_id' => ['nullable', 'exists:users,id'],
             'expired_at' => ['nullable', 'date'],
@@ -42,6 +43,7 @@ class VoucherController extends Controller
             'code' => strtoupper($request->code),
             'type' => $request->type,
             'value' => $request->value,
+            'min_purchase' => $request->min_purchase ?? 0,
             'scope' => $request->scope,
             'user_id' => $request->scope === 'user' ? $request->user_id : null,
             'expired_at' => $request->expired_at,
